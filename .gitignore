@@ -1,6 +1,5 @@
-**/__pycache__
-
-.vscode
 env
+.vscode
 .env
-db.sqlite3
+.idea
+**/__pycache__

@@ -27,12 +27,19 @@ env.read_env(str(BASE_DIR.path(".env")))
 SECRET_KEY = 'z0$c1mon$!19@8v^2n)s_sbbdagah_$g5samh5p5*n@wjqybf^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", True)
 
 ALLOWED_HOSTS = []
 
 
 # Application definition
+THIRD_PARTY_APPS = [
+    'django_extensions',
+]
+
+LOCAL_APPS = [
+    'users'
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,7 +48,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
+] + THIRD_PARTY_APPS + LOCAL_APPS
+
+AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -119,3 +128,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# STATIC_ROOT = str(BASE_DIR.path('static'))
