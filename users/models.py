@@ -1,15 +1,45 @@
+from os import path
+
+from django.conf import settings
+from django.core.files.storage import get_storage_class
 from django.db import models, IntegrityError
 from model_utils.models import SoftDeletableModel
 from django.contrib.auth.models import AbstractUser
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFill
 
 from utils import strings
 
+storage = get_storage_class()()
 
-class User(AbstractUser):
+
+class User(SoftDeletableModel, AbstractUser):
+    def avatar_path(self, filename, *args, **kwargs):
+        paths = [
+            settings.USER_AVATARS,
+            str(self.id),
+            path.basename(filename)
+        ]
+        return path.join(*paths)
+
     email = models.EmailField(unique=True)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
+
+    avatar = models.ImageField(upload_to=avatar_path,
+                               storage=storage,
+                               blank=True,
+                               max_length=256)
+    avatar_thumbnail = ProcessedImageField(upload_to=avatar_path,
+                                           storage=storage,
+                                           processors=[ResizeToFill(
+                                               width=settings.AVATAR_THUMBNAIL_WIDTH,
+                                               height=settings.AVATAR_THUMBNAIL_HEIGHT
+                                           )],
+                                           format="JPEG",
+                                           options={"quality": 90},
+                                           blank=True)
 
     @classmethod
     def get_or_create(cls, email: str):

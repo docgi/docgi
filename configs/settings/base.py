@@ -35,6 +35,9 @@ ALLOWED_HOSTS = []
 # Application definition
 THIRD_PARTY_APPS = [
     'django_extensions',
+    'rest_framework',
+    'imagekit',
+    'rest_framework_swagger',
 ]
 
 LOCAL_APPS = [
@@ -128,4 +131,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = str(BASE_DIR.path('static'))
+
+
+##############################
+# Config for local apps
+##############################
+
+USER_AVATARS = 'users/avatars'
+AVATAR_THUMBNAIL_WIDTH = 100
+AVATAR_THUMBNAIL_HEIGHT = 100
