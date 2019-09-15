@@ -15,9 +15,12 @@ storage = get_storage_class()()
 
 class User(SoftDeletableModel, AbstractUser):
     def avatar_path(self, filename, *args, **kwargs):
+        """
+        Only work for update.
+        """
         paths = [
             settings.USER_AVATARS,
-            str(self.id),
+            str(self.pk),
             path.basename(filename)
         ]
         return path.join(*paths)

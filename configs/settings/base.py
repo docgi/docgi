@@ -67,6 +67,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'configs.urls'
 
+MEDIA_ROOT = BASE_DIR.path('media')
+MEDIA_URL = 'media/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -112,6 +115,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+# Rest framework
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/

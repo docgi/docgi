@@ -6,7 +6,7 @@ from . import apps, apis
 router = routers.DefaultRouter()
 
 router.register(
-    r"",
+    r"users",
     apis.UserViewSet,
     basename="users"
 )
