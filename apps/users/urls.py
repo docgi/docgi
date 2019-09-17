@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from . import apps, apis
+from . import apis
 
 
 router = routers.DefaultRouter()

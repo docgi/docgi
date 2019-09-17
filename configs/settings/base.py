@@ -37,11 +37,11 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'rest_framework',
     'imagekit',
-    'rest_framework_swagger',
+    'drf_yasg'
 ]
 
 LOCAL_APPS = [
-    'users'
+    'apps.users'
 ]
 
 INSTALLED_APPS = [
@@ -118,7 +118,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Rest framework
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+}
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_GENERATOR_CLASS': 'drf_yasg.generators.OpenAPISchemaGenerator',
 }
 
 # Internationalization

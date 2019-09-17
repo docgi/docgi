@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 
-from utils import strings
+from apps.utils import strings
 
 storage = get_storage_class()()
 

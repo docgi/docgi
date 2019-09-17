@@ -6,7 +6,7 @@ import django.core.files.storage
 from django.db import migrations, models
 import django.utils.timezone
 import imagekit.models.fields
-import users.models
+import apps.users.models
 
 
 class Migration(migrations.Migration):
@@ -33,8 +33,8 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('is_removed', models.BooleanField(default=False)),
                 ('email', models.EmailField(max_length=254, unique=True)),
-                ('avatar', models.ImageField(blank=True, max_length=256, storage=django.core.files.storage.FileSystemStorage, upload_to=users.models.User.avatar_path)),
-                ('avatar_thumbnail', imagekit.models.fields.ProcessedImageField(blank=True, storage=django.core.files.storage.FileSystemStorage, upload_to=users.models.User.avatar_path)),
+                ('avatar', models.ImageField(blank=True, max_length=256, storage=django.core.files.storage.FileSystemStorage, upload_to=apps.users.models.User.avatar_path)),
+                ('avatar_thumbnail', imagekit.models.fields.ProcessedImageField(blank=True, storage=django.core.files.storage.FileSystemStorage, upload_to=apps.users.models.User.avatar_path)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
             ],

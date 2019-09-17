@@ -2,4 +2,3 @@
 
 pylint==2.3.1
 ipdb
-django-rest-swagger
