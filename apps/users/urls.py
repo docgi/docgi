@@ -1,12 +1,14 @@
 from rest_framework import routers
 
-from . import apis
+from . import apis, apps
 
+
+app_name = apps.UsersConfig.name
 
 router = routers.DefaultRouter()
 
 router.register(
-    r"users",
+    r"",
     apis.UserViewSet,
     basename="users"
 )

@@ -41,7 +41,8 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    'apps.users'
+    'apps.users',
+    'apps.workspaces'
 ]
 
 INSTALLED_APPS = [
@@ -149,6 +150,10 @@ STATIC_URL = '/static/'
 # Config for local apps
 ##############################
 
+# User
 USER_AVATARS = 'users/avatars'
 AVATAR_THUMBNAIL_WIDTH = 100
 AVATAR_THUMBNAIL_HEIGHT = 100
+
+# Workspace
+WORKSPACE_LOGO_DIR_NAME = 'workspaces/logo/'
