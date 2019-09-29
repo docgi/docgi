@@ -32,6 +32,8 @@ DEBUG = env.bool("DEBUG", True)
 ALLOWED_HOSTS = []
 
 
+ADMIN_EMAIL = env.str("ADMIN_EMAIL", "example@email.com")
+
 # Application definition
 THIRD_PARTY_APPS = [
     'django_extensions',
@@ -71,10 +73,22 @@ ROOT_URLCONF = 'configs.urls'
 MEDIA_ROOT = BASE_DIR.path('media')
 MEDIA_URL = 'media/'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': env.str('REDIS_URL'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            str(BASE_DIR.path('templates'))
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
