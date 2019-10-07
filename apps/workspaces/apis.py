@@ -2,8 +2,10 @@ from django.conf import settings as app_settings
 from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,21 +20,26 @@ class CheckWorkspaceView(APIView):
         AllowAny
     ]
 
+    @swagger_auto_schema(
+        request_body=serializers.CheckWorkspaceSerializer
+    )
     def post(self, request, *args, **kwargs):
-        workspace_name = request.data.get("name", None)
-        if workspace_name is None:
-            return Response(
-                data=dict(error="Invalid payload."),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer = serializers.CheckWorkspaceSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        is_exists = models.Workspace.objects.filter(
-            name__iexact=workspace_name
-        ).exists()
-        return Response(
-            data=dict(exists=is_exists),
-            status=status.HTTP_200_OK
-        )
+        workspace = models.Workspace.objects.filter(
+            name__iexact=serializer.data["name"]
+        ).first()
+
+        if workspace is None:
+            return Response(data=dict(exist=False), status=status.HTTP_200_OK)
+
+        data = {
+            "exist": True,
+            "name": workspace.name,
+            "logo": request.build_absolute_uri(workspace.logo.url)
+        }
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class CreateWorkspaceApi(GenericViewSet):
@@ -49,7 +56,7 @@ class CreateWorkspaceApi(GenericViewSet):
 
         email = serializer.data["email"]
 
-        code = strings.random_string_number(max_len=6)
+        code = strings.random_string_number(max_len=serializers.MAX_LEN_CODE)
         self._set_cache_and_email(email=email, code=code)
 
         return Response(status=status.HTTP_200_OK)
@@ -61,7 +68,20 @@ class CreateWorkspaceApi(GenericViewSet):
         url_path="check-code"
     )
     def check_code(self, request):
-        pass
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        key_cache = self._get_key_cache(email=serializer.data["email"])
+        cache_code = cache.get(key_cache)
+        if cache_code is None or cache_code != serializer.data["code"]:
+            raise ValidationError("Invalid code.")
+        return Response(status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class
+    )
 
     def _set_cache_and_email(self, email: str, code: str):
         ctx = dict(
@@ -81,3 +101,10 @@ class CreateWorkspaceApi(GenericViewSet):
     def _get_key_cache(self, email: str) -> str:
         key = f"{self.__module__}#{self.__class__}#{email}"
         return key
+
+
+class WorkspaceViewSet(viewsets.ModelViewSet):
+    serializer_class = serializers.WorkspaceSerializer
+    queryset = models.Workspace.objects.all()
+    permission_classes = (AllowAny,)
+    lookup_field = "name"

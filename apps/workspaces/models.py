@@ -13,7 +13,6 @@ storage = get_storage_class()()
 UNIQUE_WORKSPACE_AND_USER_CONSTRAINT_NAME = "unique_workspace_user_constraint"
 
 
-
 class Workspace(SoftDeletableModel, TimeStampedModel):
     def logo_path(self, filename, *args, **kwargs):
         paths = [

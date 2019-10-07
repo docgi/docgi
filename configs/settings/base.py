@@ -69,7 +69,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'configs.urls'
 
 MEDIA_ROOT = BASE_DIR.path('media')
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 
 CACHES = {
     'default': {
