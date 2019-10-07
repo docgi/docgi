@@ -46,6 +46,7 @@ class User(SoftDeletableModel, AbstractUser):
 
     @classmethod
     def get_or_create(cls, email: str):
+        user = None
         try:
             user = cls.objects.get(email__iexact=email)
         except cls.DoesNotExist:

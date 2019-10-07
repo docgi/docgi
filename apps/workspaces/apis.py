@@ -1,8 +1,6 @@
 from django.conf import settings as app_settings
 from django.core.cache import cache
-from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
-from django.core.validators import EmailValidator
 from django.template.loader import render_to_string
 from rest_framework import status
 from rest_framework.decorators import action
@@ -21,9 +19,6 @@ class CheckWorkspaceView(APIView):
     ]
 
     def post(self, request, *args, **kwargs):
-        """
-        Check workspace exists or not with `name`
-        """
         workspace_name = request.data.get("name", None)
         if workspace_name is None:
             return Response(
@@ -49,21 +44,10 @@ class CreateWorkspaceApi(GenericViewSet):
         url_path="get-code"
     )
     def get_code(self, request):
-        email = request.data.get("email", None)
-        if email is None:
-            return Response(
-                data=dict(error="Email is required."),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        validator = EmailValidator()
-        try:
-            validator(email)
-        except ValidationError as ex:
-            return Response(
-                data=dict(error=ex.message),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        email = serializer.data["email"]
 
         code = strings.random_string_number(max_len=6)
         self._set_cache_and_email(email=email, code=code)
@@ -85,10 +69,15 @@ class CreateWorkspaceApi(GenericViewSet):
             code=code
         )
         subject = "Welcome"
-        text_content = render_to_string("email/getcode/getcode.txt", ctx)
-        html_content = render_to_string("email/getcode/getcode.html", ctx)
+        text_content = render_to_string("email/getcode/email.txt", ctx)
+        html_content = render_to_string("email/getcode/email.html", ctx)
         msg = EmailMultiAlternatives(subject, text_content, app_settings.ADMIN_EMAIL, [email])
         msg.attach_alternative(html_content, "text/html")
         msg.send()
 
-        cache.set(email, code)
+        key = self._get_key_cache(email=email)
+        cache.set(key, code)
+
+    def _get_key_cache(self, email: str) -> str:
+        key = f"{self.__module__}#{self.__class__}#{email}"
+        return key

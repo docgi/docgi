@@ -31,7 +31,6 @@ DEBUG = env.bool("DEBUG", True)
 
 ALLOWED_HOSTS = []
 
-
 ADMIN_EMAIL = env.str("ADMIN_EMAIL", "example@email.com")
 
 # Application definition
@@ -41,20 +40,19 @@ THIRD_PARTY_APPS = [
     'imagekit',
     'drf_yasg'
 ]
-
 LOCAL_APPS = [
     'apps.users',
     'apps.workspaces'
 ]
-
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-] + THIRD_PARTY_APPS + LOCAL_APPS
+]
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -83,11 +81,19 @@ CACHES = {
     }
 }
 
+# EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
+EMAIL_HOST = env.str('EMAIL_HOST')
+EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            str(BASE_DIR.path('templates'))
+            BASE_DIR.path('templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -165,7 +171,7 @@ STATIC_URL = '/static/'
 ##############################
 
 # User
-USER_AVATARS = 'users/avatars'
+USER_AVATARS = 'users/avatars/'
 AVATAR_THUMBNAIL_WIDTH = 100
 AVATAR_THUMBNAIL_HEIGHT = 100
 
