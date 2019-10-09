@@ -22,7 +22,7 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
         ]
         return path.join(*paths)
 
-    name = models.CharField(unique=True,
+    name = models.SlugField(unique=True,
                             primary_key=True,
                             max_length=128,
                             db_index=True)

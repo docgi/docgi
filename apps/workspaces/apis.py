@@ -77,12 +77,6 @@ class CreateWorkspaceApi(GenericViewSet):
             raise ValidationError("Invalid code.")
         return Response(status=status.HTTP_200_OK)
 
-    @action(
-        detail=False,
-        methods=["post"],
-        serializer_class
-    )
-
     def _set_cache_and_email(self, email: str, code: str):
         ctx = dict(
             email=email,
