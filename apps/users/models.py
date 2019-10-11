@@ -1,10 +1,9 @@
 from os import path
 
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.core.files.storage import get_storage_class
 from django.db import models, IntegrityError
-from model_utils.models import SoftDeletableModel
-from django.contrib.auth.models import AbstractUser
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 
@@ -13,7 +12,7 @@ from apps.utils import strings
 storage = get_storage_class()()
 
 
-class User(SoftDeletableModel, AbstractUser):
+class User(AbstractUser):
     def avatar_path(self, filename, *args, **kwargs):
         """
         Only work for update.

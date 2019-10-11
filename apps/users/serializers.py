@@ -6,4 +6,4 @@ from . import models
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        exclude = ("is_removed",)
+        fields = "__all__"

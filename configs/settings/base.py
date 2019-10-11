@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
+
 import environ
 
 
@@ -139,7 +141,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Rest framework
 REST_FRAMEWORK = {
-    # 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
 }
 
 SWAGGER_SETTINGS = {
@@ -164,6 +168,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# djangorestframework-simpple-jwt
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=90),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',)
+}
 
 
 ##############################
