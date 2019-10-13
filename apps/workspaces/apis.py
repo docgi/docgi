@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
@@ -77,6 +77,24 @@ class CreateWorkspaceApi(GenericViewSet):
             raise ValidationError("Invalid code.")
         return Response(status=status.HTTP_200_OK)
 
+    @action(
+        detail=False,
+        methods=["post"],
+        serializer_class=serializers.CreateWorkspaceSerializer,
+        url_path="create"
+    )
+    def create_workspace(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        key_cache = self._get_key_cache(email=request.data["email"])
+        code = cache.get(key_cache)
+        if code != request.data["code"]:
+            raise ValidationError("Invalid code.")
+        serializer.save()
+        cache.delete(key_cache)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def _set_cache_and_email(self, email: str, code: str):
         ctx = dict(
             email=email,
@@ -92,13 +110,7 @@ class CreateWorkspaceApi(GenericViewSet):
         key = self._get_key_cache(email=email)
         cache.set(key, code)
 
-    def _get_key_cache(self, email: str) -> str:
-        key = f"{self.__module__}#{self.__class__}#{email}"
+    @classmethod
+    def _get_key_cache(cls, email: str) -> str:
+        key = f"{cls.__module__}#{cls.__class__}#{email}"
         return key
-
-
-class WorkspaceViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.WorkspaceSerializer
-    queryset = models.Workspace.objects.all()
-    permission_classes = (AllowAny,)
-    lookup_field = "name"

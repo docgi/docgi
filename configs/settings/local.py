@@ -4,6 +4,11 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 LOGGING = {
     'version': 1,
+    'formatters': {
+        'sql': {
+            '()': 'django_sqlformatter.SqlFormatter',
+        },
+    },
     'filters': {
         'require_debug_true': {
             '()': 'django.utils.log.RequireDebugTrue',
@@ -14,6 +19,7 @@ LOGGING = {
             'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
+            'formatter': 'sql',
         }
     },
     'loggers': {
@@ -23,3 +29,4 @@ LOGGING = {
         }
     }
 }
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

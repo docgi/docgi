@@ -1,8 +1,10 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from apps.users.models import User
+from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from . import models
 
+User = get_user_model()
 MAX_LEN_CODE = 6
 
 
@@ -13,46 +15,47 @@ class CheckWorkspaceSerializer(serializers.Serializer):
 class GetCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
 
 class CheckCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     code = serializers.CharField(max_length=MAX_LEN_CODE)
 
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
 
 class CreateWorkspaceSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-    code = serializers.CharField(required=True, max_length=MAX_LEN_CODE)
-    workspace_name = serializers.SlugField(required=True)
+    class InnerUserSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = ("id", "email", "username", "avatar_thumbnail")
+
+    email = serializers.EmailField(required=True, write_only=True)
+    code = serializers.CharField(required=True, max_length=MAX_LEN_CODE, write_only=True)
+    workspace_name = serializers.SlugField(required=True, write_only=True)
 
     def validate_workspace_name(self, workspace_name: str) -> str:
         if models.Workspace.objects.filter(name__iexact=workspace_name).exists():
-            raise serializers.ValidationError(f"Workspace name {workspace_name} already exits.")
+            raise serializers.ValidationError("Workspace with that name already exists.")
         return workspace_name
 
     def create(self, validated_data):
         user = User.get_or_create(email=validated_data["email"])
         workspace = models.Workspace.objects.create(
-            name=validated_data["workspace"]
+            name=validated_data["workspace_name"]
         )
         models.WorkspaceMember.objects.create(
             user=user,
             workspace=workspace
         )
-        return User  # TODO: return jwt
+        return dict(
+            user=user,
+            workspace=workspace
+        )
 
-class WorkspaceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Workspace
-        fields = "__all__"
+    def to_representation(self, data):
+        user = data["user"]
+        workspace = data["workspace"]
+        ret = dict()
+        ret["user"] = self.InnerUserSerializer(instance=user, context=self.context).data
+        ret["token"] = str(DocgiTokenObtainPairSerializer.get_token(
+            user=user, workspace=workspace.name
+        ).access_token)
+        return ret

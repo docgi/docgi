@@ -14,9 +14,6 @@ storage = get_storage_class()()
 
 class User(AbstractUser):
     def avatar_path(self, filename, *args, **kwargs):
-        """
-        Only work for update.
-        """
         paths = [
             settings.USER_AVATARS,
             str(self.pk),
@@ -45,20 +42,19 @@ class User(AbstractUser):
 
     @classmethod
     def get_or_create(cls, email: str):
-        user = None
+        email = email.lower()
         try:
             user = cls.objects.get(email__iexact=email)
         except cls.DoesNotExist:
-            while True:
-                try:
-                    temp_username = strings.gen_username(email=email)
-                    user = cls(email=email.lower(), username=temp_username)
-                    user.set_unusable_password()
-                    user.save()
-                except IntegrityError:
-                    continue
-                else:
-                    break
+            username = strings.gen_username(email=email)
+
+            while cls.objects.filter(username__iexact=username).exists():
+                username = strings.gen_username(email=email)
+
+            user = cls.objects.create(
+                email=email, username=username
+            )
+            user.set_unusable_password()
         return user
 
     def __str__(self):

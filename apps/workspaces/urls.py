@@ -13,12 +13,6 @@ router.register(
     basename="create-workspace"
 )
 
-router.register(
-    "",
-    apis.WorkspaceViewSet,
-    basename="workspace"
-)
-
 urlpatterns = [
     path("check/", apis.CheckWorkspaceView.as_view(), name="check"),
 ]

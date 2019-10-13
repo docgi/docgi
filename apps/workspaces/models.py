@@ -79,4 +79,4 @@ class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
         ]
 
     def __str__(self):
-        return f"User `{self.user_id}` of Workspace `{self.workspace_id}`"
+        return f"User {self.user_id} of Workspace {self.workspace_id}"
