@@ -5,7 +5,7 @@ from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from . import models
 
 User = get_user_model()
-MAX_LEN_CODE = 6
+LEN_CODE = 6
 
 
 class CheckWorkspaceSerializer(serializers.Serializer):
@@ -18,7 +18,7 @@ class GetCodeSerializer(serializers.Serializer):
 
 class CheckCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    code = serializers.CharField(max_length=MAX_LEN_CODE)
+    code = serializers.CharField(max_length=LEN_CODE)
 
 
 class CreateWorkspaceSerializer(serializers.Serializer):
@@ -28,7 +28,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
             fields = ("id", "email", "username", "avatar_thumbnail")
 
     email = serializers.EmailField(required=True, write_only=True)
-    code = serializers.CharField(required=True, max_length=MAX_LEN_CODE, write_only=True)
+    code = serializers.CharField(required=True, max_length=LEN_CODE, write_only=True)
     workspace_name = serializers.SlugField(required=True, write_only=True)
 
     def validate_workspace_name(self, workspace_name: str) -> str:
@@ -43,7 +43,8 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         )
         models.WorkspaceMember.objects.create(
             user=user,
-            workspace=workspace
+            workspace=workspace,
+            role=models.WorkspaceMember.MemberRole.ADMIN.value
         )
         return dict(
             user=user,

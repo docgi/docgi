@@ -1,7 +1,4 @@
-from django.conf import settings as app_settings
 from django.core.cache import cache
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -11,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
-from apps.utils import strings
+from apps.utils import strings, mailer
 from . import models, serializers
 
 
@@ -55,9 +52,7 @@ class CreateWorkspaceApi(GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.data["email"]
-
-        code = strings.random_string_number(max_len=serializers.MAX_LEN_CODE)
-        self._set_cache_and_email(email=email, code=code)
+        self._set_cache_and_email(email=email)
 
         return Response(status=status.HTTP_200_OK)
 
@@ -95,20 +90,21 @@ class CreateWorkspaceApi(GenericViewSet):
         cache.delete(key_cache)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def _set_cache_and_email(self, email: str, code: str):
+    def _set_cache_and_email(self, email: str):
+        code = strings.random_string_number(max_len=serializers.LEN_CODE)
+        key = self._get_key_cache(email=email)
+        cache.set(key, code)
+
+        subject = "Welcome to docgi"
         ctx = dict(
             email=email,
             code=code
         )
-        subject = "Welcome"
-        text_content = render_to_string("email/getcode/email.txt", ctx)
-        html_content = render_to_string("email/getcode/email.html", ctx)
-        msg = EmailMultiAlternatives(subject, text_content, app_settings.ADMIN_EMAIL, [email])
-        msg.attach_alternative(html_content, "text/html")
-        msg.send()
-
-        key = self._get_key_cache(email=email)
-        cache.set(key, code)
+        mailer.send_mail(subject=subject,
+                         email=email,
+                         text_template="email/getcode/email.txt",
+                         html_template="email/getcode/email.html",
+                         context=ctx)
 
     @classmethod
     def _get_key_cache(cls, email: str) -> str:

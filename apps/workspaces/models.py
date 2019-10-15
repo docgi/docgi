@@ -2,6 +2,7 @@ from os import path
 from typing import Sequence
 
 from django.conf import settings as app_settings
+from django.contrib.auth import get_user_model
 from django.core.files.storage import get_storage_class
 from django.db import models
 from django.db.models import UniqueConstraint, Q
@@ -9,6 +10,9 @@ from django.db.models import UniqueConstraint, Q
 from model_utils.models import TimeStampedModel, SoftDeletableModel
 from rest_framework.exceptions import ValidationError
 
+from apps.utils.models import Choices
+
+User = get_user_model()
 storage = get_storage_class()()
 UNIQUE_WORKSPACE_AND_USER_CONSTRAINT_NAME = "unique_workspace_user_constraint"
 
@@ -31,17 +35,25 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
                             null=True,
                             blank=True)
 
+    creator = models.ForeignKey(User, on_delete=models.PROTECT, related_name="own_workspaces")
+
     def __str__(self):
         return self.name
 
 
 class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
+    class MemberRole(Choices):
+        ADMIN = 1
+        MEMBER = 2
+
     workspace = models.ForeignKey(Workspace,
                                   on_delete=models.CASCADE,
                                   related_name="members")
     user = models.ForeignKey("users.User",
                              on_delete=models.CASCADE,
                              related_name="workspace_member_sets")
+    role = models.PositiveSmallIntegerField(choices=MemberRole.to_choices(),
+                                            default=MemberRole.MEMBER.value)
 
     @classmethod
     def validate_members(cls, workspace_id: str, user_ids: Sequence[int]) -> Sequence[int]:

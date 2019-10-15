@@ -95,7 +95,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.path('templates'),
+            BASE_DIR.path('apps.templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -187,14 +187,4 @@ SIMPLE_JWT = {
 }
 
 
-##############################
-# Config for local apps
-##############################
-
-# User
-USER_AVATARS = 'users/avatars/'
-AVATAR_THUMBNAIL_WIDTH = 100
-AVATAR_THUMBNAIL_HEIGHT = 100
-
-# Workspace
-WORKSPACE_LOGO_DIR_NAME = 'workspaces/logo/'
+from .vars import *  # noqa
