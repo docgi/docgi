@@ -46,7 +46,7 @@ class User(AbstractUser):
         try:
             user = cls.objects.get(email__iexact=email)
         except cls.DoesNotExist:
-            username = strings.gen_username(email=email)
+            username = email[:email.find("@")]
 
             while cls.objects.filter(username__iexact=username).exists():
                 username = strings.gen_username(email=email)

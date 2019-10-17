@@ -1,6 +1,7 @@
 from os import path
 from typing import Sequence
 
+import uuid as uuid
 from django.conf import settings as app_settings
 from django.contrib.auth import get_user_model
 from django.core.files.storage import get_storage_class
@@ -10,7 +11,7 @@ from django.db.models import UniqueConstraint, Q
 from model_utils.models import TimeStampedModel, SoftDeletableModel
 from rest_framework.exceptions import ValidationError
 
-from apps.utils.models import Choices
+from apps.utils.models import Choices, BulkCreateModelManager
 
 User = get_user_model()
 storage = get_storage_class()()
@@ -29,7 +30,8 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
     name = models.SlugField(unique=True,
                             primary_key=True,
                             max_length=128,
-                            db_index=True)
+                            db_index=True,
+                            editable=False)
     logo = models.FileField(storage=storage,
                             upload_to=logo_path,
                             null=True,
@@ -92,3 +94,26 @@ class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
 
     def __str__(self):
         return f"User {self.user_id} of Workspace {self.workspace_id}"
+
+
+class Invitation(TimeStampedModel):
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=10)
+    email = models.EmailField()
+
+    workspace = models.ForeignKey("workspaces.Workspace",
+                                  on_delete=models.CASCADE)
+    workspace_role = models.PositiveSmallIntegerField(choices=WorkspaceMember.MemberRole.to_choices(),
+                                                      default=WorkspaceMember.MemberRole.MEMBER.value)
+
+    inviter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    objects = BulkCreateModelManager()
+
+    class Meta:
+        unique_together = (
+            ("email", "workspace")
+        )
+
+    def __str__(self):
+        return f"Invitation {self.email} to {self.workspace_id}"

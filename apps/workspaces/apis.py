@@ -1,15 +1,19 @@
+from django.conf import settings as app_settings
 from django.core.cache import cache
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
+from rest_framework import status, parsers
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from apps.utils import strings, mailer
-from . import models, serializers
+from . import models, serializers, permissions
+
+HOST_NAME = app_settings.HOST_NAME
 
 
 class CheckWorkspaceView(APIView):
@@ -41,11 +45,14 @@ class CheckWorkspaceView(APIView):
 
 class CreateWorkspaceApi(GenericViewSet):
     serializer_class = None
+    permission_classes = [
+        AllowAny
+    ]
 
     @action(
         detail=False, methods=["post"],
         serializer_class=serializers.GetCodeSerializer,
-        url_path="get-code"
+        url_path="get-code",
     )
     def get_code(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -86,6 +93,7 @@ class CreateWorkspaceApi(GenericViewSet):
         code = cache.get(key_cache)
         if code != request.data["code"]:
             raise ValidationError("Invalid code.")
+
         serializer.save()
         cache.delete(key_cache)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -95,7 +103,7 @@ class CreateWorkspaceApi(GenericViewSet):
         key = self._get_key_cache(email=email)
         cache.set(key, code)
 
-        subject = "Welcome to docgi"
+        subject = f"Welcome to {HOST_NAME}"
         ctx = dict(
             email=email,
             code=code
@@ -110,3 +118,22 @@ class CreateWorkspaceApi(GenericViewSet):
     def _get_key_cache(cls, email: str) -> str:
         key = f"{cls.__module__}#{cls.__class__}#{email}"
         return key
+
+
+class WorkspaceApi(RetrieveUpdateAPIView):
+    serializer_class = serializers.WorkspaceSerializer
+    parser_classes = [parsers.MultiPartParser]
+    permission_classes = [
+        (permissions.Read & permissions.IsMemberWorkspace) |
+        (permissions.Update & permissions.IsAdminWorkspace)
+    ]
+
+    def get_object(self):
+        return models.Workspace.objects.get(
+            name=self.request.user.workspace
+        )
+
+
+class SendInvitationApi(CreateAPIView):
+    serializer_class = serializers.SendInvitationSerializer
+    permission_classes = (permissions.IsAdminWorkspace,)

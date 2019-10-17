@@ -31,6 +31,9 @@ SECRET_KEY = 'z0$c1mon$!19@8v^2n)s_sbbdagah_$g5samh5p5*n@wjqybf^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", True)
 
+HOST_NAME = env.str("HOST_NAME", "https://docgi.me")
+FRONT_END_HOST_NAME = env.str("FRONT_END_HOST_NAME", HOST_NAME)
+
 ALLOWED_HOSTS = []
 
 ADMIN_EMAIL = env.str("ADMIN_EMAIL", "example@email.com")
@@ -95,7 +98,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.path('apps.templates'),
+            BASE_DIR.path('apps/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -142,8 +145,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+        'apps.authentication.class.DocgiJWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ]
 }
 
 SWAGGER_SETTINGS = {
@@ -186,5 +192,14 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',)
 }
 
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   }
+}
 
 from .vars import *  # noqa

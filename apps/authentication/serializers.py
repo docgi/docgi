@@ -19,15 +19,17 @@ class DocgiTokenObtainPairSerializer(TokenObtainSerializer):
         workspace = attrs.get("workspace")
         data = super().validate(attrs)
 
-        workspace_member = WorkspaceMember.objects.filter(
-            user_id=self.user.id, workspace__name__iexact=workspace
-        ).first()
-        if workspace_member is None:
+        try:
+            workspace_member = WorkspaceMember.objects.get(
+                user_id=self.user.id, workspace__name__iexact=workspace
+            )
+        except WorkspaceMember.DoesNotExist:
             raise AuthenticationFailed()
         refresh = self.get_token(
             self.user,
             workspace=workspace_member.workspace_id,
-            member_id=workspace_member.id
+            member_id=workspace_member.id,
+            workspace_role=workspace_member.role,
         )
         data["token"] = str(refresh.access_token)
 

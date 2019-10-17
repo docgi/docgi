@@ -11,3 +11,4 @@ django-imagekit
 drf-yasg==1.16.1
 django-redis
 djangorestframework_simplejwt
+uuid
