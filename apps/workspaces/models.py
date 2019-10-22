@@ -1,17 +1,17 @@
+import uuid as uuid
 from os import path
 from typing import Sequence
 
-import uuid as uuid
 from django.conf import settings as app_settings
 from django.contrib.auth import get_user_model
 from django.core.files.storage import get_storage_class
 from django.db import models
 from django.db.models import UniqueConstraint, Q
-
+from django.utils.timezone import timedelta, datetime, now
 from model_utils.models import TimeStampedModel, SoftDeletableModel
 from rest_framework.exceptions import ValidationError
 
-from apps.utils.models import Choices, BulkCreateModelManager
+from apps.utils.models import Choices
 
 User = get_user_model()
 storage = get_storage_class()()
@@ -101,6 +101,8 @@ class Invitation(TimeStampedModel):
     code = models.CharField(max_length=10)
     email = models.EmailField()
 
+    activate = models.BooleanField(default=True, db_index=True)
+
     workspace = models.ForeignKey("workspaces.Workspace",
                                   on_delete=models.CASCADE)
     workspace_role = models.PositiveSmallIntegerField(choices=WorkspaceMember.MemberRole.to_choices(),
@@ -108,7 +110,10 @@ class Invitation(TimeStampedModel):
 
     inviter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
-    objects = BulkCreateModelManager()
+    def is_expire(self):
+        expire_time = self.created + timedelta(seconds=app_settings.INVITATION_EXPIRE_DURING)
+        current_time = now()
+        return current_time > expire_time
 
     class Meta:
         unique_together = (

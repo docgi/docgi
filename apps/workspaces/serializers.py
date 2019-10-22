@@ -1,8 +1,10 @@
 from os import path
 
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
 from django.conf import settings as app_settings
+from django.contrib.auth import get_user_model
+from django.http import Http404
+from rest_framework import serializers
+from django.utils.timezone import now, datetime, timedelta
 
 from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from apps.users.serializers import UserSerializer
@@ -11,7 +13,8 @@ from . import models
 
 User = get_user_model()
 LEN_CODE = 6
-URL_FRONT_END_JOIN_INVITE = "join-invite"
+URL_FRONT_END_JOIN_INVITE = "join-invite"  # Frontend must to handle this route
+
 
 
 class CheckWorkspaceSerializer(serializers.Serializer):
@@ -55,16 +58,16 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         )
         return dict(
             user=user,
-            workspace=workspace
+            workspace_name=workspace.name
         )
 
     def to_representation(self, data):
         user = data["user"]
-        workspace = data["workspace"]
+        workspace_name = data["workspace_name"]
         ret = dict()
         ret["user"] = self.InnerUserSerializer(instance=user, context=self.context).data
         ret["token"] = str(DocgiTokenObtainPairSerializer.get_token(
-            user=user, workspace=workspace.name
+            user=user, workspace=workspace_name
         ).access_token)
         return ret
 
@@ -91,15 +94,17 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
         model = models.WorkspaceMember
         fields = ("pk", "user", "role")
 
+    user = UserSerializer()
+
 
 class SendInvitationSerializer(serializers.Serializer):
-    class InnerInvitationSerialzier(serializers.Serializer):
+    class InnerInvitationSerializer(serializers.Serializer):
         email = serializers.EmailField(required=True)
         workspace_role = serializers.ChoiceField(choices=models.WorkspaceMember.MemberRole.to_choices(),
                                                  default=models.WorkspaceMember.MemberRole.MEMBER.value)
 
     invitations = serializers.ListField(
-        child=InnerInvitationSerialzier(), required=True, allow_empty=False, allow_null=False
+        child=InnerInvitationSerializer(), required=True, allow_empty=False, allow_null=False
     )
 
     def _send_invite(self, instances):
@@ -126,7 +131,7 @@ class SendInvitationSerializer(serializers.Serializer):
         result = dict()
 
         # We need check user who have joined to workspace,
-        # if any user notify to inviter that already join.
+        # if any user notify to inviter that already joined.
         emails = [it["email"] for it in invitations]
         joined = models.WorkspaceMember.objects.filter(
             user__email__in=emails, workspace__name__iexact=workspace
@@ -166,3 +171,50 @@ class SendInvitationSerializer(serializers.Serializer):
 
     def to_representation(self, result):
         return result
+
+
+class JoinInvitationSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField(write_only=True, required=True)
+
+    def create(self, validated_data):
+        uuid = validated_data.pop("key")
+        invitation = models.Invitation.objects.filter(
+            uuid=uuid, activate=True
+        ).first()
+        if invitation is None:
+            raise Http404()
+
+        if invitation.is_expire():
+            raise serializers.ValidationError("Invitation is expired.")
+
+        # In case exist invitation, collect workspace id, email and role and create WorkspaceMember,
+        # After all mark `invitation` activate is False
+        workspace_id = invitation.workspace_id
+        email = invitation.email
+        role = invitation.workspace_role
+
+        user = User.get_or_create(email=email)
+        models.WorkspaceMember.objects.create(
+            user=user, workspace_id=workspace_id, role=role
+        )
+        invitation.activate = False
+        invitation.save()
+
+        return dict(
+            user=user,
+            workspace=workspace_id
+        )
+
+    def update(self, instance, validated_data):
+        pass
+
+    def to_representation(self, data):
+        user = data.get("user")
+        workspace_name = data.get("workspace_name")
+        ret = dict(
+            user=UserSerializer(instance=data["user"]).data,
+            token=str(DocgiTokenObtainPairSerializer.get_token(
+                user=user, workspace=workspace_name
+            ).access_token)
+        )
+        return ret

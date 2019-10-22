@@ -9,7 +9,7 @@ app_name = apps.UsersConfig.name
 router = routers.DefaultRouter()
 
 router.register(
-    r"",
+    r"users",
     apis.UserViewSet,
     basename="users"
 )

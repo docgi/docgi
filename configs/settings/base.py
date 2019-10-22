@@ -193,13 +193,16 @@ SIMPLE_JWT = {
 }
 
 SWAGGER_SETTINGS = {
-   'SECURITY_DEFINITIONS': {
-      'Bearer': {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header'
-      }
-   }
+        }
+    },
+    "PERSIST_AUTH": True,
 }
 
 from .vars import *  # noqa
+
+INVITATION_EXPIRE_DURING = 60 * 60 * 24 * 3  # Three days

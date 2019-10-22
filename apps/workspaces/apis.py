@@ -34,7 +34,8 @@ class CheckWorkspaceView(APIView):
 
         if workspace is None:
             return Response(data=dict(exist=False), status=status.HTTP_200_OK)
-
+        import ipdb
+        ipdb.set_trace()
         data = {
             "exist": True,
             "name": workspace.name,
@@ -129,11 +130,17 @@ class WorkspaceApi(RetrieveUpdateAPIView):
     ]
 
     def get_object(self):
-        return models.Workspace.objects.get(
+        return models.Workspace.objects.filter(
             name=self.request.user.workspace
-        )
+        ).prefetch_related(
+            "members__user"
+        ).first()
 
 
 class SendInvitationApi(CreateAPIView):
     serializer_class = serializers.SendInvitationSerializer
     permission_classes = (permissions.IsAdminWorkspace,)
+
+
+class JoinInvitationApi(CreateAPIView):
+    serializer_class = serializers.JoinInvitationSerializer

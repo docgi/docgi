@@ -39,6 +39,7 @@ class IsAdminWorkspace(BasePermission):
 
 class IsMemberWorkspace(BasePermission):
     def has_permission(self, request, view):
-        # Return `user.is_authenticated` because at DocgiTokenObtainPairSerializer
-        # in def `validate` we have check user is WorkspaceMember
+        # Semantic purpose:
+        #   Return `user.is_authenticated` because at DocgiTokenObtainPairSerializer
+        #   in def `validate` we have check user is WorkspaceMember.
         return request.user.is_authenticated
