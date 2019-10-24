@@ -201,4 +201,18 @@ SWAGGER_SETTINGS = {
     "PERSIST_AUTH": True,
 }
 
+
+##############################
+# Config for local apps
+##############################
+
+# Invitation
 INVITATION_EXPIRE_DURING = 60 * 60 * 24 * 3  # Three days
+
+# User
+USER_AVATARS = 'users/avatars/'
+AVATAR_THUMBNAIL_WIDTH = 100
+AVATAR_THUMBNAIL_HEIGHT = 100
+
+# Workspace
+WORKSPACE_LOGO_DIR_NAME = 'workspaces/logo/'

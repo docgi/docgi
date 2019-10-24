@@ -15,9 +15,9 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: |
-        apt-get install -y psycopg2-binary
+        sudo apt-get install -y psycopg2-binary
         python -m pip install --upgrade pip
-        pip install -r requirements/local.txt   
+        pip install -r requirements/local.txt
     - name: Lint with flake8
       run: |
         pip install flake8

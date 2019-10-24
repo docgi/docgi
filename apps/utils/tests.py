@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
@@ -6,6 +8,7 @@ from rest_framework.test import APITestCase
 from apps.workspaces.models import Workspace, WorkspaceMember
 
 User = get_user_model()
+JSON_CONTENT_TYPE = "application/json"
 
 
 class DocgiTestCase(APITestCase):
@@ -63,8 +66,10 @@ class DocgiTestCase(APITestCase):
         self.assertEqual(res.status_code, status_code, res.data)
         return res
 
-    def post(self, path, data=None, format=None, content_type=None,
+    def post(self, path, data=None, format=None, content_type=JSON_CONTENT_TYPE,
              follow=False, status_code=status.HTTP_201_CREATED, **kwargs):
+        if data is not None and content_type == JSON_CONTENT_TYPE:
+            data = json.dumps(data)
         res = self.client.post(path=path,
                                data=data,
                                format=format,
