@@ -5,9 +5,8 @@ from apps.utils.tests import DocgiTestCase
 
 
 class TestWorkspace(DocgiTestCase):
-    def setUp(self) -> None:
-        self.make_login()
-
     def test_get_workspace_info(self):
         url_workspace = reverse("workspace:workspace-info")
-        res = self.get(url_workspace)
+        self.get(url_workspace)
+        self.make_logout()
+        self.get(url_workspace, status_code=status.HTTP_401_UNAUTHORIZED)

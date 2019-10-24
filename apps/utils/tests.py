@@ -32,6 +32,12 @@ class DocgiTestCase(APITestCase):
                                      workspace=cls.workspace,
                                      role=WorkspaceMember.MemberRole.ADMIN.value)
 
+    def tearDown(self) -> None:
+        self.make_logout()
+
+    def setUp(self) -> None:
+        self.make_login()
+
     def make_login(self, email=_creator_email, password=_password):
         """
         This function make login and set valid `token`.
@@ -44,26 +50,26 @@ class DocgiTestCase(APITestCase):
         url_login = reverse("authentication:login")
         res = self.post(url_login, data=payload_login, status_code=status.HTTP_200_OK)
         self.token = res.data["token"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
+
+    def make_logout(self):
+        self.client.credentials()
 
     def get(self, path, data=None, follow=False, status_code=status.HTTP_200_OK, **kwargs):
-        if self.token is not None:
-            self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         res = self.client.get(path=path,
                               data=data,
                               follow=follow,
                               **kwargs)
-        self.assertEqual(res.status_code, status_code)
+        self.assertEqual(res.status_code, status_code, res.data)
         return res
 
     def post(self, path, data=None, format=None, content_type=None,
              follow=False, status_code=status.HTTP_201_CREATED, **kwargs):
-        if self.token is not None:
-            self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         res = self.client.post(path=path,
                                data=data,
                                format=format,
                                content_type=content_type,
                                follow=follow,
                                **kwargs)
-        self.assertEqual(res.status_code, status_code)
+        self.assertEqual(res.status_code, status_code, res.data)
         return res
