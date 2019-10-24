@@ -4,7 +4,6 @@ from django.conf import settings as app_settings
 from django.contrib.auth import get_user_model
 from django.http import Http404
 from rest_framework import serializers
-from django.utils.timezone import now, datetime, timedelta
 
 from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from apps.users.serializers import UserSerializer
@@ -14,7 +13,6 @@ from . import models
 User = get_user_model()
 LEN_CODE = 6
 URL_FRONT_END_JOIN_INVITE = "join-invite"  # Frontend must to handle this route
-
 
 
 class CheckWorkspaceSerializer(serializers.Serializer):

@@ -3,7 +3,7 @@ from os import path
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files.storage import get_storage_class
-from django.db import models, IntegrityError
+from django.db import models
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 

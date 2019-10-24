@@ -10,11 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
-import os
 from datetime import timedelta
 
 import environ
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = environ.Path(__file__) - 3
@@ -202,7 +200,5 @@ SWAGGER_SETTINGS = {
     },
     "PERSIST_AUTH": True,
 }
-
-from .vars import *  # noqa
 
 INVITATION_EXPIRE_DURING = 60 * 60 * 24 * 3  # Three days

@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.storage import get_storage_class
 from django.db import models
 from django.db.models import UniqueConstraint, Q
-from django.utils.timezone import timedelta, datetime, now
+from django.utils.timezone import timedelta, now
 from model_utils.models import TimeStampedModel, SoftDeletableModel
 from rest_framework.exceptions import ValidationError
 
