@@ -121,3 +121,15 @@ class DocgiTestCase(APITestCase):
                                 **kwargs)
         self.assertEqual(res.status_code, status_code, res.data)
         return res
+
+    def delete(self, path, data='', content_type=JSON_CONTENT,
+               follow=False, secure=False, status_code=status.HTTP_204_NO_CONTENT, **kwargs):
+        delete_data = self._encode_data(data=data, content_type=content_type)
+        res = self.client.delete(path=path,
+                                 data=delete_data,
+                                 content_type=content_type,
+                                 follow=follow,
+                                 secure=secure,
+                                 **kwargs)
+        self.assertEqual(res.status_code, status_code, res.data)
+        return res

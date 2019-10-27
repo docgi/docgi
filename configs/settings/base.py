@@ -41,7 +41,7 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'rest_framework',
     'imagekit',
-    'drf_yasg'
+    'drf_yasg',
 ]
 LOCAL_APPS = [
     'apps.users',

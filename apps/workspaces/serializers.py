@@ -52,7 +52,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         models.WorkspaceMember.objects.create(
             user=user,
             workspace=workspace,
-            workspace_role=models.WorkspaceMember.MemberRole.ADMIN.value
+            role=models.WorkspaceMember.MemberRole.ADMIN.value
         )
         return dict(
             user=user,

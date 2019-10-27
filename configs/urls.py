@@ -38,5 +38,5 @@ urlpatterns = [
 
     path("apis/", include('apps.authentication.urls', namespace="authentication")),
     path("apis/", include('apps.users.urls', namespace='users')),
-    path("apis/", include('apps.workspaces.urls', namespace='workspace'))
+    path("apis/", include('apps.workspaces.urls', namespace='workspaces'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

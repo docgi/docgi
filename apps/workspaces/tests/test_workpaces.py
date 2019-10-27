@@ -5,7 +5,7 @@ from apps.utils.tests import DocgiTestCase, MULTIPART_CONTENT
 
 
 class TestWorkspace(DocgiTestCase):
-    url_workspace = reverse("workspace:workspace-info")
+    url_workspace = reverse("workspaces:workspace-info")
 
     def test_get_workspace_info(self):
         self.get(self.url_workspace)
