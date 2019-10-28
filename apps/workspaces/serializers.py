@@ -8,6 +8,7 @@ from rest_framework import serializers
 from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from apps.users.serializers import UserSerializer
 from apps.utils.mailer import send_mail
+from apps.utils.serializers import OnCreateOrUpdateOnlyFieldSerializerMixin
 from . import models
 
 User = get_user_model()
