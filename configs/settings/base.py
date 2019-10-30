@@ -45,7 +45,8 @@ THIRD_PARTY_APPS = [
 ]
 LOCAL_APPS = [
     'apps.users',
-    'apps.workspaces'
+    'apps.workspaces',
+    'apps.documents',
 ]
 DJANGO_APPS = [
     'django.contrib.admin',

@@ -8,7 +8,6 @@ from rest_framework import serializers
 from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from apps.users.serializers import UserSerializer
 from apps.utils.mailer import send_mail
-from apps.utils.serializers import OnCreateOrUpdateOnlyFieldSerializerMixin
 from . import models
 
 User = get_user_model()
@@ -57,17 +56,18 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         )
         return dict(
             user=user,
-            workspace_name=workspace.name
+            workspace=workspace
         )
 
     def to_representation(self, data):
         user = data["user"]
-        workspace_name = data["workspace_name"]
+        workspace = data["workspace"]
         ret = dict()
         ret["user"] = self.InnerUserSerializer(instance=user, context=self.context).data
         ret["token"] = str(DocgiTokenObtainPairSerializer.get_token(
-            user=user, workspace=workspace_name
+            user=user, workspace=workspace.name
         ).access_token)
+        ret["workspace"] = WorkspaceSerializer(instance=workspace).data
         return ret
 
 
@@ -189,6 +189,7 @@ class JoinInvitationSerializer(serializers.Serializer):
         # In case exist invitation, collect workspace id, email and role and create WorkspaceMember,
         # After all mark `invitation` activate is False
         workspace_id = invitation.workspace_id
+        workspace = models.Workspace.objects.get(pk=workspace_id)
         email = invitation.email
         role = invitation.workspace_role
 
@@ -201,7 +202,7 @@ class JoinInvitationSerializer(serializers.Serializer):
 
         return dict(
             user=user,
-            workspace=workspace_id
+            workspace=workspace
         )
 
     def update(self, instance, validated_data):
@@ -209,11 +210,12 @@ class JoinInvitationSerializer(serializers.Serializer):
 
     def to_representation(self, data):
         user = data.get("user")
-        workspace_name = data.get("workspace_name")
+        workspace = data.get("workspace")
         ret = dict(
             user=UserSerializer(instance=data["user"]).data,
             token=str(DocgiTokenObtainPairSerializer.get_token(
-                user=user, workspace=workspace_name
-            ).access_token)
+                user=user, workspace=workspace.name
+            ).access_token),
+            workspace=WorkspaceSerializer(instance=workspace).data
         )
         return ret
