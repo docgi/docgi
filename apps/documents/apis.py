@@ -5,7 +5,7 @@ from . import serializers, models
 
 class CollectionViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CollectionSerializer
-    queryset = models.Collection.objects.all()
+    queryset = models.Collection.objects.prefetch_related("members").all()
     pagination_class = None
 
     def get_queryset(self):

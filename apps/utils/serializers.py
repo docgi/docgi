@@ -1,3 +1,5 @@
+from django.db.models.query import QuerySet
+
 POST = "POST"
 PUT = "PUT"
 PATCH = "PATCH"
@@ -37,3 +39,26 @@ class DocgiModelSerializerMixin(object):
 
         return fields
 
+
+class DocgiFlexToPresentSerializerMixin(object):
+    @property
+    def on_represent_fields_maps(self) -> dict:
+        return self.Meta.on_represent_fields_maps
+
+    def to_representation(self, instance):
+        for field_name in self.on_represent_fields_maps.keys():
+            self.fields.pop(field_name, None)
+
+        ret = super().to_representation(instance=instance)
+
+        for field_name in self.on_represent_fields_maps.keys():
+            data = getattr(instance, field_name, None)
+            if data.__class__.__name__ == "ManyRelatedManager":
+                data = data.all()
+            ret[field_name] = self.on_represent_fields_maps[field_name]["class"](
+                instance=data,
+                many=self.on_represent_fields_maps[field_name]["many"],
+                context=self.context
+            ).data
+
+        return ret
