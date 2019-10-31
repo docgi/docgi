@@ -36,7 +36,15 @@ class Document(TimeStampedModel):
     archive = models.BooleanField(default=False)
     draft = models.BooleanField(default=True)
 
-    contributors = ArrayField(base_field=models.IntegerField())
+    collection = models.ForeignKey(Collection,
+                                   on_delete=models.CASCADE,
+                                   related_name="documents")
+    creator = models.ForeignKey(User,
+                                null=True,
+                                on_delete=models.SET_NULL,
+                                related_name="owner_docs")
+    contributors = models.ManyToManyField(User,
+                                          related_name="contributed_docs")
 
     class Meta:
         ordering = ("created",)

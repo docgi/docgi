@@ -176,7 +176,7 @@ class JoinInvitationSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(write_only=True, required=True)
 
     def create(self, validated_data):
-        uuid = validated_data.pop("key")
+        uuid = validated_data.pop("uuid")
         invitation = models.Invitation.objects.filter(
             uuid=uuid, activate=True
         ).first()

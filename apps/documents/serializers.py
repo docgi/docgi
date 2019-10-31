@@ -1,8 +1,10 @@
 from typing import Sequence
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from rest_framework import serializers
 
+from apps.users.serializers import UserIdAndAvatarUserSerializer
 from apps.utils.serializers import (
     DocgiModelSerializerMixin, UPDATE_ACTIONS,
     DocgiFlexToPresentSerializerMixin)
@@ -12,13 +14,9 @@ from . import models
 User = get_user_model()
 
 
-class CollectionMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id",)
-
-
-class CollectionSerializer(DocgiFlexToPresentSerializerMixin, DocgiModelSerializerMixin, serializers.ModelSerializer):
+class CollectionSerializer(DocgiFlexToPresentSerializerMixin,
+                           DocgiModelSerializerMixin,
+                           serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = ("id", "name", "workspace", "creator", "members")
@@ -26,7 +24,7 @@ class CollectionSerializer(DocgiFlexToPresentSerializerMixin, DocgiModelSerializ
         only_create_fields = ("members",)
         on_represent_fields_maps = {
             "members": {
-                "class": CollectionMemberSerializer,
+                "class": UserIdAndAvatarUserSerializer,
                 "many": True
             }
         }
@@ -79,5 +77,46 @@ class CollectionSerializer(DocgiFlexToPresentSerializerMixin, DocgiModelSerializ
                 user_id=user_id, collection=instance
             ))
         CollectionMemberClass.objects.bulk_create(objs)
-
         return instance
+
+
+class ListDocumentSerializer(DocgiFlexToPresentSerializerMixin,
+                             serializers.ModelSerializer):
+    class Meta:
+        model = models.Document
+        fields = ("id", "title", "star")
+        on_represent_fields_maps = {
+            "contributors": {
+                "class": UserIdAndAvatarUserSerializer,
+                "many": True
+            }
+        }
+
+    star = serializers.IntegerField(read_only=True, default=0)
+
+
+class DocumentSerializer(DocgiFlexToPresentSerializerMixin,
+                         serializers.ModelSerializer):
+    class Meta:
+        model = models.Document
+        fields = ("title", "contents", "star", "contributors")
+        on_represent_fields_maps = {
+            "contributors": {
+                "class": UserIdAndAvatarUserSerializer,
+                "many": True
+            }
+        }
+
+    star = serializers.IntegerField(read_only=True, default=0)
+    contributors = serializers.ListField(
+        child=UserIdAndAvatarUserSerializer(), read_only=True
+    )
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        view_kwargs = self.context["view"].kwargs
+        validated_data.update(
+            collection_id=view_kwargs.get("collection"),
+            creator=user
+        )
+        return super().create(validated_data=validated_data)

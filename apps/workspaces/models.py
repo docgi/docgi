@@ -75,8 +75,7 @@ class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
 
         diff = user_ids - set(valid_members)
         if diff:
-            msg = str(valid_members)
-            raise ValidationError(detail=msg)
+            raise ValidationError("You have invited member not in this workspace.")
 
         return list(valid_members)
 

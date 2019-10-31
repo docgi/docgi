@@ -1,5 +1,3 @@
-from django.db.models.query import QuerySet
-
 POST = "POST"
 PUT = "PUT"
 PATCH = "PATCH"
@@ -18,7 +16,7 @@ class DocgiModelSerializerMixin(object):
             extra_read_only_fields = []
 
         assert isinstance(extra_read_only_fields, (list, tuple)), (
-            "`only_on_create_fields` or `only_on_update_fields` must be type of `list` or `tuple`."
+            "`only_create_fields` or `only_update_fields` must be type of `list` or `tuple`."
         )
         return extra_read_only_fields
 
@@ -41,23 +39,61 @@ class DocgiModelSerializerMixin(object):
 
 
 class DocgiFlexToPresentSerializerMixin(object):
+    """
+    This mixin override to_representation method of serializer class.
+    Please set valid attribute 'on_represent_fields_maps' in Meta class of serializer.
+
+    Example 'on_represent_fields_maps':
+    on_represent_fields_maps = {
+        "members": {
+            "class": UserSerializer,
+            "many": True,  # default is False
+        }
+    }
+    """
     @property
     def on_represent_fields_maps(self) -> dict:
+        assert hasattr(self, "Meta"), (
+            f"Class {self.__class__.__name__} missing class Meta attribute."
+        )
+        assert hasattr(self.Meta, "on_represent_fields_maps"), (
+            f"Class {self.__class__.__name__}.Meta missing on_represent_fields_maps attribute. "
+            f"To use this mixin please set valid 'on_represent_fields_maps' attribute."
+        )
         return self.Meta.on_represent_fields_maps
 
     def to_representation(self, instance):
-        for field_name in self.on_represent_fields_maps.keys():
-            self.fields.pop(field_name, None)
+        on_represent_fields_maps = self.on_represent_fields_maps
+        for field_name in on_represent_fields_maps.keys():
+            field = self.fields.pop(field_name, None)
+            if field is not None:
+                if on_represent_fields_maps[field_name].get("source", None) is None:
+                    on_represent_fields_maps[field_name].update(
+                        {"source": field.source}
+                    )
 
         ret = super().to_representation(instance=instance)
+        for field_name in on_represent_fields_maps.keys():
+            Serializer = on_represent_fields_maps[field_name].get("class", None)
+            assert Serializer is not None, (
+                "Field 'class' attribute is None or not set. "
+                "Please set valid serializer class for this field."
+            )
+            source = on_represent_fields_maps[field_name].get("source")
+            many = on_represent_fields_maps[field_name].get("many", False)
 
-        for field_name in self.on_represent_fields_maps.keys():
-            data = getattr(instance, field_name, None)
+            if source is not None:
+                data = getattr(instance, source, None) or getattr(instance, field_name, None)
+            else:
+                data = getattr(instance, field_name, None)
+
+            # If source data is ManyRelatedManager we need fetch all data.
             if data.__class__.__name__ == "ManyRelatedManager":
                 data = data.all()
-            ret[field_name] = self.on_represent_fields_maps[field_name]["class"](
+
+            ret[field_name] = Serializer(
                 instance=data,
-                many=self.on_represent_fields_maps[field_name]["many"],
+                many=many,
                 context=self.context
             ).data
 

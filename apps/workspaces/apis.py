@@ -34,8 +34,6 @@ class CheckWorkspaceView(APIView):
 
         if workspace is None:
             return Response(data=dict(exist=False), status=status.HTTP_200_OK)
-        import ipdb
-        ipdb.set_trace()
         data = {
             "exist": True,
             "name": workspace.name,
@@ -144,3 +142,4 @@ class SendInvitationApi(CreateAPIView):
 
 class JoinInvitationApi(CreateAPIView):
     serializer_class = serializers.JoinInvitationSerializer
+    permission_classes = (AllowAny,)

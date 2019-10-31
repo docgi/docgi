@@ -25,3 +25,10 @@ class UserSerializer(serializers.ModelSerializer):
         if avatar is not None:
             validated_data.update(avatar_thumbnail=avatar)
         return super().update(validated_data=validated_data, instance=instance)
+
+
+class UserIdAndAvatarUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = ("id", "avatar_thumbnail")
+        read_only_fields = ("id", "avatar_thumbnail")

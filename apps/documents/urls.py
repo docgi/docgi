@@ -12,5 +12,11 @@ router.register(
     basename="collections"
 )
 
+router.register(
+    r"collections/(?P<collection>\d+)/docs",
+    apis.DocumentViewSet,
+    basename="documents"
+)
+
 urlpatterns = []
 urlpatterns += router.urls
