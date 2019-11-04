@@ -22,7 +22,7 @@ class TestWorkspace(DocgiTestCase):
             self.assertIsNotNone(res.data["logo"])
 
     def test_update_workspace_name(self):
-        new_name = self.workspace.name + "new_name"
+        new_name = self.workspace.name + "new-name"
         payload = {
             "name": new_name
         }

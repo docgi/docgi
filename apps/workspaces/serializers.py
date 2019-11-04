@@ -32,7 +32,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
     class InnerUserSerializer(serializers.ModelSerializer):
         class Meta:
             model = User
-            fields = ("id", "email", "username", "avatar_thumbnail")
+            fields = ("id", "email", "username", "avatar")
 
     email = serializers.EmailField(required=True, write_only=True)
     code = serializers.CharField(required=True, max_length=LEN_CODE, write_only=True)

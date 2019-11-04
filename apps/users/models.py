@@ -26,19 +26,15 @@ class User(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 
-    avatar = models.ImageField(upload_to=avatar_path,
-                               storage=storage,
-                               blank=True,
-                               max_length=256)
-    avatar_thumbnail = ProcessedImageField(upload_to=avatar_path,
-                                           storage=storage,
-                                           processors=[ResizeToFill(
-                                               width=settings.AVATAR_THUMBNAIL_WIDTH,
-                                               height=settings.AVATAR_THUMBNAIL_HEIGHT
-                                           )],
-                                           format="JPEG",
-                                           options={"quality": 90},
-                                           blank=True)
+    avatar = ProcessedImageField(upload_to=avatar_path,
+                                 storage=storage,
+                                 processors=[ResizeToFill(
+                                     width=settings.AVATAR_THUMBNAIL_WIDTH,
+                                     height=settings.AVATAR_THUMBNAIL_HEIGHT
+                                 )],
+                                 format="JPEG",
+                                 options={"quality": 90},
+                                 blank=True)
 
     @classmethod
     def get_or_create(cls, email: str):

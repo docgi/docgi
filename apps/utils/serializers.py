@@ -44,12 +44,15 @@ class DocgiFlexToPresentSerializerMixin(object):
     Please set valid attribute 'on_represent_fields_maps' in Meta class of serializer.
 
     Example 'on_represent_fields_maps':
-    on_represent_fields_maps = {
-        "members": {
-            "class": UserSerializer,
-            "many": True,  # default is False
+    class Meta:
+        model = ...
+        fields = (...,)
+        on_represent_fields_maps = {
+            "members": {
+                "class": UserSerializer,
+                "many": True,  # default is False
+            }
         }
-    }
     """
     @property
     def on_represent_fields_maps(self) -> dict:
