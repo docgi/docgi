@@ -3,6 +3,13 @@ from rest_framework import serializers
 from . import models
 
 
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = ("id", "avatar")
+        read_only_fields = ("id", "avatar")
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
@@ -21,8 +28,31 @@ class UserSerializer(serializers.ModelSerializer):
         return username
 
 
-class UserIdAndAvatarUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.User
-        fields = ("id", "avatar_thumbnail")
-        read_only_fields = ("id", "avatar")
+class ChangePasswordSerializer(serializers.Serializer):
+    old_pass = serializers.CharField(max_length=150)
+    new_pass = serializers.CharField(max_length=150, min_length=8)
+    repeat_pass = serializers.CharField(max_length=150, min_length=8)
+
+    def validate_old_pass(self, old_pass: str):
+        user = self.context["request"].user
+        if user.check_password(old_pass):
+            return old_pass
+
+        raise serializers.ValidationError("Wrong old password.")
+
+    def validate(self, attrs):
+        new_pass = attrs.get("new_pass")
+        repeat_pass = attrs.get("repeat_pass")
+
+        if new_pass != repeat_pass:
+            raise serializers.ValidationError({
+                "new_pass": "New pass and repeat pass doesn't match."
+            })
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        new_pass = validated_data.pop("new_pass")
+        user.set_password(raw_password=new_pass)
+        user.save()
+        return user

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from rest_framework import serializers
 
-from apps.users.serializers import UserIdAndAvatarUserSerializer
+from apps.users.serializers import UserInfoSerializer
 from apps.utils.serializers import (
     DocgiModelSerializerMixin, UPDATE_ACTIONS,
     DocgiFlexToPresentSerializerMixin)
@@ -24,7 +24,7 @@ class CollectionSerializer(DocgiFlexToPresentSerializerMixin,
         only_create_fields = ("members",)
         on_represent_fields_maps = {
             "members": {
-                "class": UserIdAndAvatarUserSerializer,
+                "class": UserInfoSerializer,
                 "many": True
             }
         }
@@ -87,7 +87,7 @@ class ListDocumentSerializer(DocgiFlexToPresentSerializerMixin,
         fields = ("id", "title", "star")
         on_represent_fields_maps = {
             "contributors": {
-                "class": UserIdAndAvatarUserSerializer,
+                "class": UserInfoSerializer,
                 "many": True
             }
         }
@@ -102,14 +102,14 @@ class DocumentSerializer(DocgiFlexToPresentSerializerMixin,
         fields = ("title", "contents", "star", "contributors")
         on_represent_fields_maps = {
             "contributors": {
-                "class": UserIdAndAvatarUserSerializer,
+                "class": UserInfoSerializer,
                 "many": True
             }
         }
 
     star = serializers.IntegerField(read_only=True, default=0)
     contributors = serializers.ListField(
-        child=UserIdAndAvatarUserSerializer(), read_only=True
+        child=UserInfoSerializer(), read_only=True
     )
 
     def create(self, validated_data):
