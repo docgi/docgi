@@ -91,7 +91,7 @@ class WorkspaceSerializer(serializers.ModelSerializer):
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.WorkspaceMember
-        fields = ("pk", "user", "role")
+        fields = ("id", "user", "role")
 
     user = UserSerializer()
 
@@ -204,9 +204,6 @@ class JoinInvitationSerializer(serializers.Serializer):
             user=user,
             workspace=workspace
         )
-
-    def update(self, instance, validated_data):
-        pass
 
     def to_representation(self, data):
         user = data.get("user")

@@ -41,13 +41,13 @@ class DocgiModelSerializerMixin(object):
 class DocgiFlexToPresentSerializerMixin(object):
     """
     This mixin override to_representation method of serializer class.
-    Please set valid attribute 'on_represent_fields_maps' in Meta class of serializer.
+    Please set valid attribute 'flex_represent_fields' in Meta class of serializer.
 
-    Example 'on_represent_fields_maps':
+    Example 'flex_represent_fields':
     class Meta:
         model = ...
         fields = (...,)
-        on_represent_fields_maps = {
+        flex_represent_fields = {
             "members": {
                 "class": UserSerializer,
                 "many": True,  # default is False
@@ -55,35 +55,35 @@ class DocgiFlexToPresentSerializerMixin(object):
         }
     """
     @property
-    def on_represent_fields_maps(self) -> dict:
+    def flex_represent_fields(self) -> dict:
         assert hasattr(self, "Meta"), (
             f"Class {self.__class__.__name__} missing class Meta attribute."
         )
-        assert hasattr(self.Meta, "on_represent_fields_maps"), (
-            f"Class {self.__class__.__name__}.Meta missing on_represent_fields_maps attribute. "
-            f"To use this mixin please set valid 'on_represent_fields_maps' attribute."
+        assert hasattr(self.Meta, "flex_represent_fields"), (
+            f"Class {self.__class__.__name__}.Meta missing flex_represent_fields attribute. "
+            f"To use this mixin please set valid 'flex_represent_fields' attribute."
         )
-        return self.Meta.on_represent_fields_maps
+        return self.Meta.flex_represent_fields
 
     def to_representation(self, instance):
-        on_represent_fields_maps = self.on_represent_fields_maps
-        for field_name in on_represent_fields_maps.keys():
+        flex_represent_fields = self.flex_represent_fields
+        for field_name in flex_represent_fields.keys():
             field = self.fields.pop(field_name, None)
             if field is not None:
-                if on_represent_fields_maps[field_name].get("source", None) is None:
-                    on_represent_fields_maps[field_name].update(
+                if flex_represent_fields[field_name].get("source", None) is None:
+                    flex_represent_fields[field_name].update(
                         {"source": field.source}
                     )
 
         ret = super().to_representation(instance=instance)
-        for field_name in on_represent_fields_maps.keys():
-            Serializer = on_represent_fields_maps[field_name].get("class", None)
+        for field_name in flex_represent_fields.keys():
+            Serializer = flex_represent_fields[field_name].get("class", None)
             assert Serializer is not None, (
                 "Field 'class' attribute is None or not set. "
                 "Please set valid serializer class for this field."
             )
-            source = on_represent_fields_maps[field_name].get("source")
-            many = on_represent_fields_maps[field_name].get("many", False)
+            source = flex_represent_fields[field_name].get("source")
+            many = flex_represent_fields[field_name].get("many", False)
 
             if source is not None:
                 data = getattr(instance, source, None) or getattr(instance, field_name, None)

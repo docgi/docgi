@@ -13,7 +13,7 @@ router.register(
 )
 
 urlpatterns = [
-    path("workspace", apis.WorkspaceApi.as_view(), name="workspace-info"),
+    path("workspace/", apis.WorkspaceApi.as_view(), name="workspace-info"),
     path("workspaces/check/", apis.CheckWorkspaceView.as_view(), name="check"),
     path("invitations/sends", apis.SendInvitationApi.as_view(), name="send-invitation"),
     path("invitations/join", apis.JoinInvitationApi.as_view(), name="join-invitation"),

@@ -22,7 +22,7 @@ class CollectionSerializer(DocgiFlexToPresentSerializerMixin,
         fields = ("id", "name", "workspace", "creator", "members")
         read_only_fields = ("workspace", "creator")
         only_create_fields = ("members",)
-        on_represent_fields_maps = {
+        flex_represent_fields = {
             "members": {
                 "class": UserInfoSerializer,
                 "many": True
@@ -85,7 +85,7 @@ class ListDocumentSerializer(DocgiFlexToPresentSerializerMixin,
     class Meta:
         model = models.Document
         fields = ("id", "title", "star")
-        on_represent_fields_maps = {
+        flex_represent_fields = {
             "contributors": {
                 "class": UserInfoSerializer,
                 "many": True
@@ -100,7 +100,7 @@ class DocumentSerializer(DocgiFlexToPresentSerializerMixin,
     class Meta:
         model = models.Document
         fields = ("title", "contents", "star", "contributors")
-        on_represent_fields_maps = {
+        flex_represent_fields = {
             "contributors": {
                 "class": UserInfoSerializer,
                 "many": True
