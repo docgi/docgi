@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 class DocgiMiddleware(MiddlewareMixin):
     def process_request(self, request):
         print('\n\n')
+        print('|--------------------------------------------------------------------------')
         print('| Start')
-        print('--------------------------------------------------------------------------')
 
     def process_response(self, request, response):
         from pygments import highlight, lexers, formatters
@@ -25,6 +25,6 @@ class DocgiMiddleware(MiddlewareMixin):
             )
             print(raw_sql)
 
-        print('--------------------------------------------------------------------------')
         print('| ;; Total queries: %d' % (len(connection.queries)))
+        print('|-------------------------------------------------------------------------')
         return response

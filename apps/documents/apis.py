@@ -21,7 +21,7 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
         "list": serializers.ListDocumentSerializer
     }
     serializer_class = serializers.DocumentSerializer
-    queryset = models.Document.objects.all()
+    queryset = models.Document.objects.select_related("creator").all()
 
     def get_queryset(self):
         return self.queryset.filter(

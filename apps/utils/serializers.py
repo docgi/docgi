@@ -4,7 +4,7 @@ PATCH = "PATCH"
 UPDATE_ACTIONS = ("update", "partial_update")
 
 
-class DocgiModelSerializerMixin(object):
+class DocgiReadonlyFieldsMixin(object):
     def get_extra_read_only_fields(self):
         method = self.context["request"].method
 
@@ -38,7 +38,7 @@ class DocgiModelSerializerMixin(object):
         return fields
 
 
-class DocgiFlexToPresentSerializerMixin(object):
+class DocgiFlexToPresentMixin(object):
     """
     This mixin override to_representation method of serializer class.
     Please set valid attribute 'flex_represent_fields' in Meta class of serializer.
@@ -101,3 +101,12 @@ class DocgiFlexToPresentSerializerMixin(object):
             ).data
 
         return ret
+
+
+class DocgiValidateIntegrityMixin(object):
+    def validate_integrity(self):
+        raise NotImplementedError("`validate_integrity` not implemented.")
+
+    def create(self, validated_data):
+        self.validate_integrity()
+        return super().create(validated_data)
