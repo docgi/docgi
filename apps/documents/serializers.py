@@ -79,8 +79,7 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
         return instance
 
 
-class ListDocumentSerializer(DocgiFlexToPresentMixin,
-                             serializers.ModelSerializer):
+class ListDocumentSerializer(DocgiFlexToPresentMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = ("id", "title", "star", "creator")

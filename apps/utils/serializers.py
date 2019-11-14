@@ -66,6 +66,7 @@ class DocgiFlexToPresentMixin(object):
         return self.Meta.flex_represent_fields
 
     def to_representation(self, instance):
+        context = self.context
         flex_represent_fields = self.flex_represent_fields
         for field_name in flex_represent_fields.keys():
             field = self.fields.pop(field_name, None)
@@ -82,9 +83,8 @@ class DocgiFlexToPresentMixin(object):
                 "Field 'class' attribute is None or not set. "
                 "Please set valid serializer class for this field."
             )
-            source = flex_represent_fields[field_name].get("source")
-            many = flex_represent_fields[field_name].get("many", False)
-
+            source = flex_represent_fields.get(field_name).get("source", None)
+            many = flex_represent_fields.get(field_name).get("many", False)
             if source is not None:
                 data = getattr(instance, source, None) or getattr(instance, field_name, None)
             else:
@@ -97,7 +97,7 @@ class DocgiFlexToPresentMixin(object):
             ret[field_name] = Serializer(
                 instance=data,
                 many=many,
-                context=self.context
+                context=context
             ).data
 
         return ret

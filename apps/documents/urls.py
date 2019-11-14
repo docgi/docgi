@@ -13,7 +13,7 @@ router.register(
 )
 
 router.register(
-    r"collections/(?P<collection>\d+)/docs",
+    r"docs",
     apis.DocumentViewSet,
     basename="documents"
 )

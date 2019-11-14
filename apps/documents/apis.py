@@ -21,12 +21,15 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
         "list": serializers.ListDocumentSerializer
     }
     serializer_class = serializers.DocumentSerializer
-    queryset = models.Document.objects.select_related("creator").all()
+    queryset = models.Document.objects.select_related(
+        "creator"
+    ).prefetch_related(
+        "contributors"
+    ).all()
 
     def get_queryset(self):
         return self.queryset.filter(
-            collection__workspace=self.request.user.workspace,
-            collection=self.kwargs.get("collection")
+            collection__workspace=self.request.user.workspace
         ).annotate(
             star=Count(Subquery(
                 models.UserStarDoc.objects.order_by().values("doc").filter(
