@@ -12,3 +12,4 @@ drf-yasg==1.16.1
 django-redis
 djangorestframework_simplejwt
 uuid
+django_filter

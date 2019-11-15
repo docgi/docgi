@@ -42,6 +42,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'imagekit',
     'drf_yasg',
+    'django_filters'
 ]
 LOCAL_APPS = [
     'apps.users',
@@ -146,9 +147,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'apps.authentication.class.DocgiJWTAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
 
 SWAGGER_SETTINGS = {

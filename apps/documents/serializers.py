@@ -6,7 +6,7 @@ from rest_framework import serializers
 from apps.users.serializers import UserInfoSerializer
 from apps.utils.serializers import (
     DocgiReadonlyFieldsMixin, UPDATE_ACTIONS,
-    DocgiFlexToPresentMixin, DocgiValidateIntegrityMixin)
+    DocgiFlexToPresentMixin)
 from apps.workspaces.models import WorkspaceMember
 from . import models
 
@@ -82,7 +82,7 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
 class ListDocumentSerializer(DocgiFlexToPresentMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Document
-        fields = ("id", "title", "star", "creator")
+        fields = ("id", "title", "star", "creator", "collection")
         flex_represent_fields = {
             "contributors": {
                 "class": UserInfoSerializer,
@@ -97,11 +97,11 @@ class ListDocumentSerializer(DocgiFlexToPresentMixin, serializers.ModelSerialize
 
 
 class DocumentSerializer(DocgiFlexToPresentMixin,
-                         DocgiValidateIntegrityMixin,
                          serializers.ModelSerializer):
     class Meta:
         model = models.Document
-        fields = ("title", "contents", "star", "contributors", "creator")
+        fields = ("id", "title", "contents", "star", "contributors", "creator", "collection")
+        read_only_fields = ("contributors",)
         flex_represent_fields = {
             "contributors": {
                 "class": UserInfoSerializer,
@@ -117,21 +117,26 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         child=UserInfoSerializer(), read_only=True
     )
 
-    def validate_integrity(self):
-        workspace_id = self.context["request"].user.workspace
-        collection_id = self.context["view"].kwargs.get("collection")
-        checker = models.Collection.objects.filter(
-            id=collection_id, workspace_id=workspace_id
-        )
-
-        if not checker.exists():
-            raise serializers.ValidationError({"message": "Are you hacker?"})
+    def validate_collection(self, collection):
+        current_workspace = self.context["request"].user.workspace
+        if collection.workspace_id != current_workspace:
+            raise serializers.ValidationError()
+        return collection
 
     def create(self, validated_data):
         user = self.context["request"].user
-        view_kwargs = self.context["view"].kwargs
         validated_data.update(
-            collection_id=view_kwargs.get("collection"),
             creator=user
         )
         return super().create(validated_data=validated_data)
+
+    def update(self, instance, validated_data):
+        current_user = self.context["request"].user
+        contributors = instance.contributors.all()
+        instance = super().update(instance, validated_data)
+
+        if current_user.id != instance.creator_id and \
+                current_user.id not in [user.id for user in contributors]:
+            instance.contributors.add(current_user)
+
+        return instance

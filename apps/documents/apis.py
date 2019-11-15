@@ -1,6 +1,7 @@
 from django.db.models import Subquery, IntegerField, OuterRef, Count
 from rest_framework import viewsets
 
+from apps.documents import filters
 from apps.utils.apis import DocgiFlexSerializerViewSetMixin
 from . import serializers, models
 
@@ -26,6 +27,7 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
     ).prefetch_related(
         "contributors"
     ).all()
+    filterset_class = filters.DocumentFilter
 
     def get_queryset(self):
         return self.queryset.filter(
