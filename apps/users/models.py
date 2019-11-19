@@ -15,7 +15,7 @@ storage = get_storage_class()()
 class User(AbstractUser):
     def avatar_path(self, filename, *args, **kwargs):
         paths = [
-            settings.USER_AVATARS,
+            settings.USER_AVATAR_DIRNAME,
             str(self.pk),
             path.basename(filename)
         ]

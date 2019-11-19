@@ -27,7 +27,7 @@ env.read_env(str(BASE_DIR.path(".env")))
 SECRET_KEY = 'z0$c1mon$!19@8v^2n)s_sbbdagah_$g5samh5p5*n@wjqybf^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", True)
+DEBUG = env.bool("DEBUG", False)
 
 HOST_NAME = env.str("HOST_NAME", "https://docgi.me")
 FRONT_END_HOST_NAME = env.str("FRONT_END_HOST_NAME", HOST_NAME)
@@ -215,7 +215,7 @@ SWAGGER_SETTINGS = {
 INVITATION_EXPIRE_DURING = 60 * 60 * 24 * 3  # Three days
 
 # User
-USER_AVATARS = 'users/avatars/'
+USER_AVATAR_DIRNAME = 'users/avatars/'
 AVATAR_THUMBNAIL_WIDTH = 100
 AVATAR_THUMBNAIL_HEIGHT = 100
 
