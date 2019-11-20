@@ -32,4 +32,3 @@ services:
       - 8000:8000
     command:
       uwsgi --http :8000 --chdir /home/docgi/ -w configs.wsgi:application
-
