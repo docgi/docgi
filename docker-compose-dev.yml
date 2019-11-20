@@ -31,4 +31,6 @@ services:
     ports:
       - 8000:8000
     command:
+      python manage.py migrate && \
+      python manage.py collectstatic --noinput && \
       uwsgi --http :8000 --chdir /home/docgi/ -w configs.wsgi:application
