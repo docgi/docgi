@@ -32,7 +32,7 @@ DEBUG = env.bool("DEBUG", False)
 HOST_NAME = env.str("HOST_NAME", "https://docgi.me")
 FRONT_END_HOST_NAME = env.str("FRONT_END_HOST_NAME", HOST_NAME)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", [])
 
 ADMIN_EMAIL = env.str("ADMIN_EMAIL", "example@email.com")
 
