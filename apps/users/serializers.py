@@ -1,5 +1,4 @@
 from django.core.validators import MinLengthValidator, MaxLengthValidator
-from django.db import transaction
 from rest_framework import serializers
 
 from . import models
@@ -70,22 +69,20 @@ class UserSetPasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["repeat_password"]:
-            raise serializers.ValidationError("password and repeat password doesn't match.")
+            raise serializers.ValidationError({"error": "password and repeat password doesn't match."})
         return attrs
 
-    @transaction.atomic
     def create(self, validated_data):
         user = self.context["request"].user
         raw_password = validated_data.get("password")
         if user.has_usable_password():
-            raise serializers.ValidationError({"error": "Password has been set."})
+            raise serializers.ValidationError({"error": "Password has been set before."})
 
         user.set_password(raw_password=raw_password)
         return user
 
     def to_representation(self, instance):
         ret = dict(
-            status="oke",
             user=UserInfoSerializer(instance, context=self.context).data
         )
         return ret

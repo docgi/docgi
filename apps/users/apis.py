@@ -30,6 +30,9 @@ class UserChangePasswordApi(generics.CreateAPIView):
 
 
 class UserSetPasswordApi(generics.CreateAPIView):
+    """
+    This api only use for the first time set password.
+    """
     serializer_class = serializers.UserSetPasswordSerializer
 
     @transaction.atomic
