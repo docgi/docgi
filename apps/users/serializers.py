@@ -69,7 +69,7 @@ class UserSetPasswordSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         if attrs["password"] != attrs["repeat_password"]:
-            raise serializers.ValidationError({"error": "password and repeat password doesn't match."})
+            raise serializers.ValidationError({"error": "password and repeat password do not match."})
         return attrs
 
     def create(self, validated_data):
