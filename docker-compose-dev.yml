@@ -32,5 +32,7 @@ services:
       - 8000:8000
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             uwsgi --http :8000 --chdir /home/docgi/ -w configs.wsgi:application"
+             uwsgi --http :8000 \
+                   --chdir /home/docgi/ \
+                   --env DJANGO_SETTINGS_MODULE=configs.settings.dev \
+                   -w configs.wsgi:application"
