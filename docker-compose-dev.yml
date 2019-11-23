@@ -28,11 +28,12 @@ services:
     depends_on:
       - postgres
       - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=configs.settings.dev
     ports:
       - 8000:8000
     command: >
       sh -c "python manage.py migrate &&
              uwsgi --http :8000 \
                    --chdir /home/docgi/ \
-                   --env DJANGO_SETTINGS_MODULE=configs.settings.dev \
                    -w configs.wsgi:application"
