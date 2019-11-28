@@ -32,14 +32,12 @@ class CheckWorkspaceView(APIView):
             name__iexact=serializer.data["name"]
         ).first()
 
-        if workspace is None:
-            return Response(data=dict(exist=False), status=status.HTTP_200_OK)
-        data = {
-            "exist": True,
-            "name": workspace.name,
-            "logo": request.build_absolute_uri(workspace.logo.url)
-        }
-        return Response(data=data, status=status.HTTP_200_OK)
+        result = dict(exist=False, workspace=None)
+        if workspace is not None:
+            workspace_data = serializers.WorkspacePublicInfoSerializer(instance=workspace,
+                                                                       context={"request": self.request}).data
+            result.update(exist=True, workspace=workspace_data)
+        return Response(data=result, status=status.HTTP_200_OK)
 
 
 class CreateWorkspaceApi(GenericViewSet):

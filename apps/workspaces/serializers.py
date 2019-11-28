@@ -71,6 +71,12 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         return ret
 
 
+class WorkspacePublicInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Workspace
+        fields = ("name", "logo")
+
+
 class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Workspace

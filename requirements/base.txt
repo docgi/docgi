@@ -14,3 +14,4 @@ django-redis
 djangorestframework_simplejwt
 uuid
 django_filter
+django-cors-headers
