@@ -32,7 +32,12 @@ class CreateWorkspaceSerializer(serializers.Serializer):
     class InnerUserSerializer(serializers.ModelSerializer):
         class Meta:
             model = User
-            fields = ("id", "email", "username", "avatar")
+            fields = ("id", "email", "username", "avatar", "need_pass")
+
+        need_pass = serializers.SerializerMethodField()
+
+        def get_need_pass(self, user):
+            return not user.has_usable_password()
 
     email = serializers.EmailField(required=True, write_only=True)
     code = serializers.CharField(required=True, max_length=LEN_CODE, write_only=True)
@@ -67,7 +72,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         ret["token"] = str(DocgiTokenObtainPairSerializer.get_token(
             user=user, workspace=workspace.name
         ).access_token)
-        ret["workspace"] = WorkspaceSerializer(instance=workspace).data
+        ret["workspace"] = WorkspaceSerializer(instance=workspace, context=self.context).data
         return ret
 
 
@@ -99,7 +104,7 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
         model = models.WorkspaceMember
         fields = ("id", "user", "role")
 
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
 
 
 class SendInvitationSerializer(serializers.Serializer):

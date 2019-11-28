@@ -7,6 +7,26 @@ from apps.utils.tests import DocgiTestCase, MULTIPART_CONTENT
 class TestWorkspace(DocgiTestCase):
     url_workspace = reverse("workspaces:workspace-info")
 
+    def test_check_workspace_exist(self):
+        url_check_workspace = reverse("workspaces:check")
+        self.make_logout()
+        payload = {
+            "name": self.workspace.name
+        }
+        res = self.post(url_check_workspace, data=payload, status_code=status.HTTP_200_OK)
+        self.assertTrue(res.data["exist"])
+        self.assertIsNotNone(res.data["workspace"])
+
+    def test_check_workspace_not_exist(self):
+        url_check_workspace = reverse("workspaces:check")
+        self.make_logout()
+        payload = {
+            "name": "not-exist"
+        }
+        res = self.post(url_check_workspace, data=payload, status_code=status.HTTP_200_OK)
+        self.assertFalse(res.data["exist"])
+        self.assertIsNone(res.data["workspace"])
+
     def test_get_workspace_info(self):
         self.get(self.url_workspace)
         self.make_logout()
