@@ -10,7 +10,8 @@ RUN apk update && \
             musl-dev \
             jpeg-dev \
             zlib-dev \
-            linux-headers
+            linux-headers \
+            git
 COPY requirements/ /tmp
 RUN pip install -r /tmp/dev.txt
 COPY . .
