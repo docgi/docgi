@@ -3,6 +3,7 @@ import logging
 import sqlparse
 from django.db import connection
 from django.utils.deprecation import MiddlewareMixin
+from pygments import highlight, lexers, formatters
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,6 @@ class LogQueryMiddleware(MiddlewareMixin):
         print("| Start")
 
     def process_response(self, request, response):
-        from pygments import highlight, lexers, formatters
         for item in connection.queries:
             raw_sql = item["sql"]
             raw_sql = sqlparse.format(raw_sql, reindent_aligned=True, truncate_strings=500)
