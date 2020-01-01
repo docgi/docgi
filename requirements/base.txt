@@ -10,7 +10,7 @@ djangorestframework==3.10.3
 git+git://github.com/jazzband/django-model-utils.git#egg=django-model-utils
 django-imagekit
 drf-yasg==1.17.0
-django-redis
+git+git://github.com/niwinz/django-redis.git#egg=django-redis
 djangorestframework_simplejwt
 uuid
 django_filter

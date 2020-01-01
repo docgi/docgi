@@ -73,7 +73,7 @@ class CreateWorkspaceApi(GenericViewSet):
         key_cache = self._get_key_cache(email=serializer.data["email"])
         cache_code = cache.get(key_cache)
         if cache_code is None or cache_code != serializer.data["code"]:
-            raise ValidationError("Invalid code.")
+            raise ValidationError({"code": ["Invalid code"]})
         return Response(status=status.HTTP_200_OK)
 
     @action(
