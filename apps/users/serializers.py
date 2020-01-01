@@ -63,13 +63,13 @@ class UserSetPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(validators=[
         MinLengthValidator(8), MaxLengthValidator(50)
     ])
-    repeat_password = serializers.CharField(validators=[
+    password_confirm = serializers.CharField(validators=[
         MinLengthValidator(8), MaxLengthValidator(50)
     ])
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["repeat_password"]:
-            raise serializers.ValidationError({"error": "password and repeat password do not match."})
+        if attrs["password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError({"password_confirm": "Password and password confirm does not match."})
         return attrs
 
     def create(self, validated_data):
