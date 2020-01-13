@@ -54,23 +54,28 @@ class CreateWorkspaceSerializer(serializers.Serializer):
             name=validated_data["workspace_name"],
             creator=user
         )
-        models.WorkspaceMember.objects.create(
+        member = models.WorkspaceMember.objects.create(
             user=user,
             workspace=workspace,
             role=models.WorkspaceMember.MemberRole.ADMIN.value
         )
         return dict(
             user=user,
-            workspace=workspace
+            workspace=workspace,
+            member=member
         )
 
     def to_representation(self, data):
-        user = data["user"]
-        workspace = data["workspace"]
+        user = data.get("user")
+        workspace = data.get("workspace")
+        member = data.get("member")
         ret = dict()
         ret["user"] = self.InnerUserSerializer(instance=user, context=self.context).data
         ret["token"] = str(DocgiTokenObtainPairSerializer.get_token(
-            user=user, workspace=workspace.name
+            user=user,
+            workspace=workspace.name,
+            workspace_role=member.role,
+            member_id=member.id
         ).access_token)
         ret["workspace"] = WorkspaceSerializer(instance=workspace, context=self.context).data
         return ret
@@ -85,18 +90,10 @@ class WorkspacePublicInfoSerializer(serializers.ModelSerializer):
 class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Workspace
-        fields = ("name", "creator", "created", "members", "logo")
-        read_only_fields = ("creator", "name")
+        fields = ("name", "creator", "created", "members", "logo", "members")
+        read_only_fields = ("creator", "name", "members")
 
-    members = serializers.SerializerMethodField()
-
-    def get_members(self, workspace):
-        members = workspace.members.all()
-        return WorkspaceMemberSerializer(
-            instance=members,
-            many=True,
-            context=self.context
-        ).data
+    members = serializers.JSONField(source='workspace_members')
 
 
 class WorkspaceMemberSerializer(serializers.ModelSerializer):

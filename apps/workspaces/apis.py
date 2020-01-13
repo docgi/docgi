@@ -1,5 +1,8 @@
 from django.conf import settings as app_settings
+from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
+from django.db.models import Subquery, OuterRef
+from django.db.models.expressions import RawSQL
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, parsers
 from rest_framework.decorators import action
@@ -128,8 +131,24 @@ class WorkspaceApi(RetrieveUpdateAPIView):
     def get_object(self):
         return models.Workspace.objects.filter(
             name=self.request.user.workspace
-        ).prefetch_related(
-            "members__user"
+        ).annotate(
+            workspace_members=Subquery(
+                models.WorkspaceMember.objects.filter(
+                    workspace_id=OuterRef("pk")
+                ).annotate(
+                    members=RawSQL(
+                        """
+                        json_agg(
+                            json_build_object(
+                                'user', user_id::int,
+                                'role', role::int
+                            )
+                        )
+                        """
+                    , ())
+                ).values("members"),
+                output_field=JSONField()
+            )
         ).first()
 
 
