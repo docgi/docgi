@@ -8,6 +8,7 @@ from rest_framework import serializers
 from apps.authentication.serializers import DocgiTokenObtainPairSerializer
 from apps.users.serializers import UserSerializer
 from apps.utils.mailer import send_mail
+
 from . import models
 
 User = get_user_model()
@@ -59,6 +60,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
             workspace=workspace,
             role=models.WorkspaceMember.MemberRole.ADMIN.value
         )
+        setattr(workspace, "workspace_members", [{"user": member.user_id, "role": member.role}])
         return dict(
             user=user,
             workspace=workspace,

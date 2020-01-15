@@ -1,30 +1,16 @@
 import logging
+from threading import local
 
-import sqlparse
-from django.db import connection
 from django.utils.deprecation import MiddlewareMixin
-from pygments import highlight, lexers, formatters
 
 logger = logging.getLogger(__name__)
+_thread_locals = local()
 
 
-class LogQueryMiddleware(MiddlewareMixin):
-    def process_request(self, request):
-        print("\n\n")
-        print("|--------------------------------------------------------------------------")
-        print("| Start")
+class ThreadLocalMiddleware(MiddlewareMixin):
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_response(self, request, response):
-        for item in connection.queries:
-            raw_sql = item["sql"]
-            raw_sql = sqlparse.format(raw_sql, reindent_aligned=True, truncate_strings=500)
-            raw_sql = highlight(
-                raw_sql,
-                lexers.get_lexer_by_name("sql"),
-                formatters.TerminalFormatter()
-            )
-            print(raw_sql)
-
-        print("| ;; Total queries: %d" % (len(connection.queries)))
-        print("|-------------------------------------------------------------------------")
-        return response
+    def __call__(self, request):
+        _thread_locals.query_count = 0
+        return self.get_response(request)
