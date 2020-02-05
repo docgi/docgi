@@ -1,17 +1,18 @@
 import logging
+from threading import local
 
-from .middlewares import _thread_locals
+import sqlparse
+from pygments import highlight, lexers, formatters
+
+_thread_locals = local()
 
 
 class DocgiLoggingFormatter(logging.Formatter):
     def format(self, record):
-        import sqlparse
-        from pygments import highlight, lexers, formatters
+        if not hasattr(_thread_locals, "query_count"):
+            setattr(_thread_locals, "query_count", 0)
 
-        query_count = 1
-        if hasattr(_thread_locals, "query_count"):
-            _thread_locals.query_count += 1
-            query_count = _thread_locals.query_count
+        _thread_locals.query_count += 1
 
         raw_sql = record.sql.strip()
         raw_sql = sqlparse.format(raw_sql, reindent_aligned=True, truncate_strings=500)
@@ -21,9 +22,9 @@ class DocgiLoggingFormatter(logging.Formatter):
             formatters.TerminalFormatter()
         )
         statement = \
-            f"====================== Query {query_count} ======================\n" \
-            f"{raw_sql}" \
-            f"======================  End {query_count}  =======================\n" \
+            f"====================== Query {_thread_locals.query_count} ======================\n\n" \
+            f"{raw_sql}\n" \
+            f"======================  End {_thread_locals.query_count}  =======================\n" \
             f"Duration: {record.duration:.3f}\n"
 
         return statement
