@@ -95,7 +95,7 @@ class ListDocumentSerializer(FlexToPresentMixin, serializers.ModelSerializer):
     star = serializers.IntegerField(read_only=True, default=0)
 
 
-class DocumentSerializer(DocgiFlexToPresentMixin,
+class DocumentSerializer(FlexToPresentMixin,
                          ExtraReadOnlyField,
                          serializers.ModelSerializer):
     class Meta:
