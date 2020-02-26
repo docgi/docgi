@@ -93,9 +93,9 @@ class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Workspace
         fields = ("name", "creator", "created", "members", "logo", "members")
-        read_only_fields = ("creator", "name", "members")
+        read_only_fields = ("creator", "name",)
 
-    members = serializers.JSONField(source='workspace_members')
+    members = serializers.JSONField(source='workspace_members', read_only=True)
 
 
 class WorkspaceMemberSerializer(serializers.ModelSerializer):

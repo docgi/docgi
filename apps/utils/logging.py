@@ -22,9 +22,8 @@ class DocgiLoggingFormatter(logging.Formatter):
             formatters.TerminalFormatter()
         )
         statement = \
-            f"====================== Query {_thread_locals.query_count} ======================\n\n" \
+            f"-------------------------------------------- Query {_thread_locals.query_count} --------------------------------------------\n\n" \
             f"{raw_sql}\n" \
-            f"======================  End {_thread_locals.query_count}  =======================\n" \
             f"Duration: {record.duration:.3f}\n"
 
         return statement

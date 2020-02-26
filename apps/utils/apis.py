@@ -3,9 +3,7 @@ class DocgiFlexSerializerViewSetMixin(object):
     Get suitable for class base on view action.
     This mixin is for use with ModelViewSet.
     """
-    action_serializer_maps = {
-
-    }
+    action_serializer_maps = {}
 
     def get_serializer_class(self):
         try:

@@ -1,13 +1,13 @@
 packaging
 Pillow
-Django==3.0
+Django==3.0.3
 psycopg2==2.8.3
 pytz==2019.2
 django-environ
-djangorestframework==3.10.3
+djangorestframework==3.11.0
 git+git://github.com/jazzband/django-model-utils.git#egg=django-model-utils
 django-imagekit
-drf-yasg==1.17.0
+drf-yasg==1.17.1
 git+git://github.com/niwinz/django-redis.git#egg=django-redis
 djangorestframework_simplejwt
 uuid

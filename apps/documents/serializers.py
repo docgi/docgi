@@ -2,19 +2,18 @@ from typing import Sequence
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from dumas.serializers import FlexToPresentMixin, ExtraReadOnlyField
 
 from apps.users.serializers import UserInfoSerializer
-from apps.utils.serializers import (
-    DocgiReadonlyFieldsMixin, UPDATE_ACTIONS,
-    DocgiFlexToPresentMixin)
+from apps.utils.serializers import UPDATE_ACTIONS
 from apps.workspaces.models import WorkspaceMember
 from . import models
 
 User = get_user_model()
 
 
-class CollectionSerializer(DocgiFlexToPresentMixin,
-                           DocgiReadonlyFieldsMixin,
+class CollectionSerializer(FlexToPresentMixin,
+                           ExtraReadOnlyField,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
@@ -23,7 +22,7 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
         only_create_fields = ("members",)
         flex_represent_fields = {
             "members": {
-                "class": UserInfoSerializer,
+                "presenter": UserInfoSerializer,
                 "many": True
             }
         }
@@ -79,7 +78,7 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
         return instance
 
 
-class ListDocumentSerializer(DocgiFlexToPresentMixin, serializers.ModelSerializer):
+class ListDocumentSerializer(FlexToPresentMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = ("id", "title", "star", "creator", "collection")
@@ -97,14 +96,16 @@ class ListDocumentSerializer(DocgiFlexToPresentMixin, serializers.ModelSerialize
 
 
 class DocumentSerializer(DocgiFlexToPresentMixin,
+                         ExtraReadOnlyField,
                          serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = ("id", "title", "contents", "star", "contributors", "creator", "collection")
         read_only_fields = ("contributors",)
+        only_create_fields = ("collection",)
         flex_represent_fields = {
             "contributors": {
-                "class": UserInfoSerializer,
+                "class": "docgi.apps.users.serializers.UserInfoSerializer",
                 "many": True
             },
             "creator": {
