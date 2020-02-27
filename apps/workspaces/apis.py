@@ -8,6 +8,7 @@ from rest_framework import status, parsers
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.mixins import ListModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -145,11 +146,27 @@ class WorkspaceApi(RetrieveUpdateAPIView):
                             )
                         )
                         """
-                    , ())
+                        , ())
                 ).values("members"),
                 output_field=JSONField()
             )
         ).first()
+
+
+class WorkspaceMemberAPI(ListModelMixin, UpdateModelMixin, GenericViewSet):
+    queryset = models.WorkspaceMember.objects.select_related("user").all()
+    permission_classes = [
+        (permissions.Read & permissions.IsMemberWorkspace) |
+        (permissions.Update & permissions.IsAdminWorkspace)
+    ]
+    serializer_class = serializers.WorkspaceMemberSerializer
+    lookup_field = "user"
+    lookup_value_regex = "\d+"
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            workspace_id__exact=self.request.user.workspace
+        )
 
 
 class SendInvitationApi(CreateAPIView):

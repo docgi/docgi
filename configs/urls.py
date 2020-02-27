@@ -36,8 +36,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
-    path("apis/", include('apps.authentication.urls', namespace="authentication")),
-    path("apis/", include('apps.users.urls', namespace='users')),
-    path("apis/", include('apps.workspaces.urls', namespace='workspaces')),
-    path("apis/", include('apps.documents.urls', namespace='documents')),
+    path("api/", include('apps.authentication.urls', namespace="authentication")),
+    path("api/", include('apps.users.urls', namespace='users')),
+    path("api/", include('apps.workspaces.urls', namespace='workspaces')),
+    path("api/", include('apps.documents.urls', namespace='documents')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

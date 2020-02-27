@@ -101,7 +101,7 @@ class WorkspaceSerializer(serializers.ModelSerializer):
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.WorkspaceMember
-        fields = ("id", "user", "role")
+        fields = ("user", "role")
 
     user = UserSerializer(read_only=True)
 

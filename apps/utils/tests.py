@@ -38,8 +38,33 @@ class DocgiTestCase(APITestCase):
                                      workspace=cls.workspace,
                                      role=WorkspaceMember.MemberRole.ADMIN.value)
 
+        cls.member1 = User.objects.create_user(
+            email="u1@email.com",
+            username="u1",
+            password=cls._password
+        )
+        cls.member2 = User.objects.create_user(
+            email="u2@email.com",
+            username="u2",
+            password=cls._password
+        )
+        cls.member3 = User.objects.create_user(
+            email="u3@email.com",
+            username="u3",
+            password=cls._password
+        )
+        cls.member4 = User.objects.create_user(
+            email="u4@email.com",
+            username="u4",
+            password=cls._password
+        )
+        for user in [cls.member1, cls.member2, cls.member3, cls.member4]:
+            cls.workspace.members.create(user=user,
+                                         workspace=cls.workspace,
+                                         role=WorkspaceMember.MemberRole.MEMBER.value)
+
     def setUp(self) -> None:
-        self.make_login()
+        self.make_login(self.creator)
 
     def tearDown(self) -> None:
         self.make_logout()
@@ -60,15 +85,15 @@ class DocgiTestCase(APITestCase):
 
         return data
 
-    def make_login(self, workspace=_workspace_name, email=_creator_email, password=_password):
+    def make_login(self, user: User):
         """
         This function make login and set valid `token`.
         By default login with creator of workspace.
         """
         payload_login = {
-            "workspace": workspace,
-            "email": email,
-            "password": password
+            "workspace": self._workspace_name,
+            "email": user.email,
+            "password": self._password
         }
         url_login = reverse("authentication:login")
         res = self.post(url_login, data=payload_login, status_code=status.HTTP_200_OK)

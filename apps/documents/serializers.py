@@ -17,9 +17,9 @@ class CollectionSerializer(FlexToPresentMixin,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
-        fields = ("id", "name", "workspace", "creator", "members")
+        fields = ("id", "name", "workspace", "creator", "members", "private")
         read_only_fields = ("workspace", "creator")
-        only_create_fields = ("members",)
+        create_only_fields = ("members",)
         flex_represent_fields = {
             "members": {
                 "presenter": UserInfoSerializer,
@@ -78,23 +78,6 @@ class CollectionSerializer(FlexToPresentMixin,
         return instance
 
 
-class ListDocumentSerializer(FlexToPresentMixin, serializers.ModelSerializer):
-    class Meta:
-        model = models.Document
-        fields = ("id", "title", "star", "creator", "collection")
-        flex_represent_fields = {
-            "contributors": {
-                "class": UserInfoSerializer,
-                "many": True,
-            },
-            "creator": {
-                "class": UserInfoSerializer
-            }
-        }
-
-    star = serializers.IntegerField(read_only=True, default=0)
-
-
 class DocumentSerializer(FlexToPresentMixin,
                          ExtraReadOnlyField,
                          serializers.ModelSerializer):
@@ -102,14 +85,15 @@ class DocumentSerializer(FlexToPresentMixin,
         model = models.Document
         fields = ("id", "title", "contents", "star", "contributors", "creator", "collection")
         read_only_fields = ("contributors",)
-        only_create_fields = ("collection",)
+        create_only_fields = ("collection",)
         flex_represent_fields = {
             "contributors": {
                 "class": "docgi.apps.users.serializers.UserInfoSerializer",
                 "many": True
             },
             "creator": {
-                "class": UserInfoSerializer
+                "class": UserInfoSerializer,
+                "many": True
             }
         }
 
