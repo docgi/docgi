@@ -6,18 +6,23 @@ User = get_user_model()
 
 
 class Collection(TimeStampedModel):
-    workspace = models.ForeignKey("workspaces.Workspace",
-                                  on_delete=models.CASCADE,
-                                  related_name="collections")
-
     name = models.CharField(max_length=150)
     private = models.BooleanField(default=False)
+
+    parent = models.ForeignKey("self",
+                               on_delete=models.CASCADE,
+                               related_name="children",
+                               null=True,
+                               default=None)
 
     creator = models.ForeignKey(User,
                                 on_delete=models.SET_NULL,
                                 null=True,
                                 related_name="owner_collections")
     members = models.ManyToManyField(User)
+    workspace = models.ForeignKey("workspaces.Workspace",
+                                  on_delete=models.CASCADE,
+                                  related_name="collections")
 
     def __str__(self):
         return self.name

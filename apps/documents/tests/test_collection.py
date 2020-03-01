@@ -1,34 +1,37 @@
 from django.urls import reverse
-from django.utils.functional import cached_property
 from rest_framework import status
 
 from apps.documents import models
 from apps.utils.tests import DocgiTestCase
 
 
+def url_list_create_collection():
+    return reverse("documents:collections-list")
+
+
+def url_collection_detail(collection_id):
+    return reverse("documents:collections-detail", kwargs={
+        "pk": collection_id
+    })
+
+
+def url_list_and_create_document():
+    return reverse("documents:documents-list")
+
+
 class TestCollection(DocgiTestCase):
-    @cached_property
-    def url_create_collection(self):
-        return reverse("documents:collections-list")
-
-    def _url_collection_detail(self, collection_id):
-        return reverse("documents:collections-detail", kwargs={
-            "pk": collection_id
-        })
-
     def _new_collection(self, name="Collection", **kwargs):
         status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
         payload = {
             "name": name,
             **kwargs
         }
-        return self.post(self.url_create_collection, data=payload, status_code=status_code)
+        return self.post(url_list_create_collection(), data=payload, status_code=status_code)
 
     def _update_collection(self, collection_id, **kwargs):
         status_code = kwargs.pop("status_code", status.HTTP_200_OK)
         payload = {**kwargs}
-        url_collection_detail = self._url_collection_detail(collection_id)
-        return self.patch(url_collection_detail, data=payload, status_code=status_code)
+        return self.patch(url_collection_detail(collection_id), data=payload, status_code=status_code)
 
     def test_create_collection(self):
         res = self._new_collection(members=[self.member1.pk, self.member2.pk])
@@ -78,14 +81,13 @@ class TestCollection(DocgiTestCase):
         self._new_collection("5")
         self._new_collection("6", private=True)
 
-        res = self.get(self.url_create_collection)
-        self.assertEqual(len(res.data), 3)  # one of creator
+        res = self.get(url_list_create_collection())
+        self.assertEqual(len(res.data), 3)  # include one of creator and two of this user.
 
     def test_delete_collection(self):
         res = self._new_collection()
         collection_id = res.data["id"]
-        url_collection_detail = self._url_collection_detail(collection_id)
-        self.delete(url_collection_detail)
+        self.delete(url_collection_detail(collection_id))
 
         _count = models.Collection.objects.filter(
             creator=self.creator, workspace_id__exact=self._workspace_name
@@ -95,6 +97,32 @@ class TestCollection(DocgiTestCase):
     def test_non_owner_collection(self):
         res = self._new_collection()
         collection_id = res.data["id"]
-        url_collection_detail = self._url_collection_detail(collection_id)
         self.make_login(self.member1)
-        self.delete(url_collection_detail, status_code=status.HTTP_403_FORBIDDEN)
+        self.delete(url_collection_detail(collection_id), status_code=status.HTTP_403_FORBIDDEN)
+
+
+class TestDocument(DocgiTestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        res = self._new_collection()
+        self.collection = models.Collection.objects.get(id=res.data["id"])
+
+    def _new_collection(self, name="Collection", **kwargs):
+        status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
+        payload = {
+            "name": name,
+            **kwargs
+        }
+        return self.post(url_list_create_collection(), data=payload, status_code=status_code)
+
+    def _new_doc(self, collection_id=None, title="Doc", **kwargs):
+        status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
+        payload = {
+            "collection": collection_id,
+            "title": title,
+            **kwargs
+        }
+        return self.post(url_list_and_create_document(), data=payload, status_code=status_code)
+
+    def test_create_doc(self):
+        self._new_doc(collection_id=self.collection.id)

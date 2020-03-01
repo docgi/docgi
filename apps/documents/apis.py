@@ -1,4 +1,4 @@
-from django.db.models import Subquery, IntegerField, OuterRef, Count, Value, Q
+from django.db.models import Subquery, IntegerField, OuterRef, Count, Value, Q, Exists, F
 from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 
@@ -15,11 +15,22 @@ class CollectionViewSet(viewsets.ModelViewSet):
     ]
 
     def get_queryset(self):
+        doc_qs = models.Document.objects.filter(
+            collection_id=OuterRef("pk")
+        ).order_by().values("pk")
+        collection_qs = models.Collection.objects.filter(
+            workspace_id__exact=self.request.user.workspace,
+        ).order_by().values("pk")
         return self.queryset.filter(
             Q(workspace_id=getattr(self.request.user, 'workspace')) &
             Q(
                 Q(private=False) | Q(private=True, creator=self.request.user)
             )
+        ).annotate(
+            has_doc=Exists(doc_qs),
+            has_collection=Exists(collection_qs)
+        ).annotate(
+            has_child=F("has_doc") or F("has_collection")
         )
 
 

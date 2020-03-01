@@ -17,9 +17,14 @@ class CollectionSerializer(FlexToPresentMixin,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
-        fields = ("id", "name", "workspace", "creator", "members", "private")
+        fields = ("id", "name", "workspace", "creator", "members", "private", "parent", "has_child")
         read_only_fields = ("workspace", "creator")
         create_only_fields = ("members",)
+        extra_kwargs = {
+            "parent": {
+                "write_only": True
+            }
+        }
         flex_represent_fields = {
             "members": {
                 "presenter": UserInfoSerializer,
@@ -31,6 +36,7 @@ class CollectionSerializer(FlexToPresentMixin,
         child=serializers.IntegerField(),
         required=False, allow_empty=True, allow_null=False,
     )
+    has_child = serializers.BooleanField(default=False, read_only=True)
 
     def validate_name(self, name):
         view = self.context["view"]
@@ -45,6 +51,19 @@ class CollectionSerializer(FlexToPresentMixin,
             raise serializers.ValidationError("That name already used.")
 
         return name
+
+    def validate_parent(self, parent: models.Collection):
+        request = self.context["request"]
+        view = self.context["view"]
+        current_workspace = request.user.workspace
+        if parent.workspace_id != current_workspace:
+            raise serializers.ValidationError("Invalid parent")
+
+        if request.method in ["POST", "PATCH"]:
+            if parent.id == view.kwargs.get("pk"):
+                raise serializers.ValidationError("Invalid parent")
+
+        return parent
 
     def validate_members(self, members: Sequence[int]) -> Sequence[int]:
         workspace_id = self.context["request"].user.workspace
@@ -84,15 +103,11 @@ class DocumentSerializer(FlexToPresentMixin,
     class Meta:
         model = models.Document
         fields = ("id", "title", "contents", "star", "contributors", "creator", "collection")
-        read_only_fields = ("contributors",)
+        read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)
         flex_represent_fields = {
             "contributors": {
-                "class": "docgi.apps.users.serializers.UserInfoSerializer",
-                "many": True
-            },
-            "creator": {
-                "class": UserInfoSerializer,
+                "presenter": "apps.users.serializers.UserInfoSerializer",
                 "many": True
             }
         }
