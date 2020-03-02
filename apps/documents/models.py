@@ -2,13 +2,15 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from model_utils.models import TimeStampedModel
 
+from apps.utils.docgi_models import ColorField
+
 User = get_user_model()
 
 
 class Collection(TimeStampedModel):
     name = models.CharField(max_length=150)
     private = models.BooleanField(default=False)
-
+    color = ColorField()
     parent = models.ForeignKey("self",
                                on_delete=models.CASCADE,
                                related_name="children",

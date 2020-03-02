@@ -11,7 +11,7 @@ from django.utils.timezone import timedelta, now
 from model_utils.models import TimeStampedModel, SoftDeletableModel
 from rest_framework.exceptions import ValidationError
 
-from apps.utils.models import Choices
+from apps.utils.docgi_models import Choices
 
 User = get_user_model()
 storage = get_storage_class()()

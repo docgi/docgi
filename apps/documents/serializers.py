@@ -5,7 +5,7 @@ from dumas.serializers import FlexToPresentMixin, ExtraReadOnlyField
 from rest_framework import serializers
 
 from apps.users.serializers import UserInfoSerializer
-from apps.utils.serializers import UPDATE_ACTIONS
+from apps.utils.docgi_serializers import UPDATE_ACTIONS, ColorField
 from apps.workspaces.models import WorkspaceMember
 from . import models
 
@@ -17,7 +17,7 @@ class CollectionSerializer(FlexToPresentMixin,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
-        fields = ("id", "name", "workspace", "creator", "members", "private", "parent", "has_child")
+        fields = ("id", "name", "workspace", "creator", "members", "private", "parent", "has_child", "color")
         read_only_fields = ("workspace", "creator")
         create_only_fields = ("members",)
         extra_kwargs = {
@@ -37,6 +37,7 @@ class CollectionSerializer(FlexToPresentMixin,
         required=False, allow_empty=True, allow_null=False,
     )
     has_child = serializers.BooleanField(default=False, read_only=True)
+    color = ColorField()
 
     def validate_name(self, name):
         view = self.context["view"]

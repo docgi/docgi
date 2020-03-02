@@ -1,7 +1,11 @@
 from enum import Enum
 
-from django.db.models import Manager
+from django.core.validators import MinLengthValidator
+from django.db.models import Manager, CharField
 from django.db.models.signals import post_save
+
+DEFAULT_COLOR = "cdd7d6"
+MAX_LENGTH_COLOR = 6
 
 
 class Choices(Enum):
@@ -25,3 +29,15 @@ class BulkCreateModelManager(Manager):
         for instance in instances:
             post_save.send(sender=self.model, instance=instance, created=True)
         return instances
+
+
+class ColorField(CharField):
+    def __init__(self, **kwargs):
+        kwargs.update(
+            null=True,
+            blank=True,
+            default=DEFAULT_COLOR,
+            max_length=MAX_LENGTH_COLOR
+        )
+        super().__init__(**kwargs)
+        self.validators.append(MinLengthValidator(6))
