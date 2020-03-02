@@ -1,8 +1,8 @@
 from typing import Sequence
 
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
 from dumas.serializers import FlexToPresentMixin, ExtraReadOnlyField
+from rest_framework import serializers
 
 from apps.users.serializers import UserInfoSerializer
 from apps.utils.serializers import UPDATE_ACTIONS
@@ -113,9 +113,6 @@ class DocumentSerializer(FlexToPresentMixin,
         }
 
     star = serializers.IntegerField(read_only=True, default=0)
-    contributors = serializers.ListField(
-        child=UserInfoSerializer(), read_only=True
-    )
 
     def validate_collection(self, collection):
         current_workspace = self.context["request"].user.workspace

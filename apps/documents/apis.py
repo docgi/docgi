@@ -18,9 +18,11 @@ class CollectionViewSet(viewsets.ModelViewSet):
         doc_qs = models.Document.objects.filter(
             collection_id=OuterRef("pk")
         ).order_by().values("pk")
+
         collection_qs = models.Collection.objects.filter(
             workspace_id__exact=self.request.user.workspace,
         ).order_by().values("pk")
+
         return self.queryset.filter(
             Q(workspace_id=getattr(self.request.user, 'workspace')) &
             Q(
@@ -44,13 +46,20 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
     filterset_class = filters.DocumentFilter
 
     def get_queryset(self):
-        return self.queryset.filter(
-            collection__workspace=getattr(self.request.user, 'workspace')
-        ).annotate(
-            star=Coalesce(Count(Subquery(
+        count_star_qs = Count(
+            Subquery(
                 models.UserStarDoc.objects.order_by().values("doc").filter(
                     doc=OuterRef("id")
                 ),
                 output_field=IntegerField()
-            )), Value(0))
+            )
+        )
+        return self.queryset.filter(
+            Q(collection__workspace=getattr(self.request.user, 'workspace')) &
+            Q(
+                Q(collection__private=False) |
+                Q(collection__private=True, collection__creator=self.request.user)
+            )
+        ).annotate(
+            star=Coalesce(count_star_qs, Value(0))
         )
