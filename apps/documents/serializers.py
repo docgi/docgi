@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from dumas.serializers import FlexToPresentMixin, ExtraReadOnlyField
 from rest_framework import serializers
 
-from apps.users.serializers import UserInfoSerializer
 from apps.utils.docgi_serializers import UPDATE_ACTIONS, ColorField
 from apps.workspaces.models import WorkspaceMember
 from . import models
@@ -12,12 +11,14 @@ from . import models
 User = get_user_model()
 
 
-class CollectionSerializer(FlexToPresentMixin,
-                           ExtraReadOnlyField,
+class CollectionSerializer(ExtraReadOnlyField,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
-        fields = ("id", "name", "workspace", "creator", "members", "private", "parent", "has_child", "color")
+        fields = (
+            "id", "name", "workspace", "creator", "members",
+            "private", "parent", "color", "child_cols", "docs"
+        )
         read_only_fields = ("workspace", "creator")
         create_only_fields = ("members",)
         extra_kwargs = {
@@ -25,19 +26,31 @@ class CollectionSerializer(FlexToPresentMixin,
                 "write_only": True
             }
         }
-        flex_represent_fields = {
-            "members": {
-                "presenter": UserInfoSerializer,
-                "many": True
-            }
-        }
 
     members = serializers.ListField(
         child=serializers.IntegerField(),
-        required=False, allow_empty=True, allow_null=False,
+        required=False,
+        allow_empty=True,
+        allow_null=False,
+        write_only=True
     )
-    has_child = serializers.BooleanField(default=False, read_only=True)
     color = ColorField()
+    docs = serializers.JSONField(read_only=True, default=list)
+    child_cols = serializers.JSONField(read_only=True, default=list)
+
+    def to_internal_value(self, data):
+        private = data.get("private", False)
+        current_user = self.context["request"].user
+        if not private:
+            # If collection is public, no need add member
+            data.pop("members", None)
+        else:
+            # Added creator in to member set
+            members = data.pop("members", [])
+            if current_user.id not in members:
+                members.append(current_user.id)
+            data.update(members=members)
+        return super().to_internal_value(data=data)
 
     def validate_name(self, name):
         view = self.context["view"]
@@ -60,7 +73,7 @@ class CollectionSerializer(FlexToPresentMixin,
         if parent.workspace_id != current_workspace:
             raise serializers.ValidationError("Invalid parent")
 
-        if request.method in ["POST", "PATCH"]:
+        if request.method in ["PUT", "PATCH"]:
             if parent.id == view.kwargs.get("pk"):
                 raise serializers.ValidationError("Invalid parent")
 
@@ -76,26 +89,12 @@ class CollectionSerializer(FlexToPresentMixin,
     def create(self, validated_data: dict):
         user = self.context["request"].user
         workspace_id = self.context["request"].user.workspace
-        members = validated_data.pop("members", [])
 
         validated_data.update(
             creator=user,
             workspace_id=workspace_id
         )
-        instance = super().create(validated_data=validated_data)
-
-        # Include creator
-        if user.id not in members:
-            members.append(user.id)
-
-        objs = list()
-        CollectionMemberClass = models.Collection.members.through
-        for user_id in members:
-            objs.append(CollectionMemberClass(
-                user_id=user_id, collection=instance
-            ))
-        CollectionMemberClass.objects.bulk_create(objs)
-        return instance
+        return super().create(validated_data=validated_data)
 
 
 class DocumentSerializer(FlexToPresentMixin,
