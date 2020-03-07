@@ -46,9 +46,9 @@ THIRD_PARTY_APPS = [
     'corsheaders',
 ]
 LOCAL_APPS = [
-    'apps.users',
-    'apps.workspaces',
-    'apps.documents',
+    'docgi.users',
+    'docgi.workspaces',
+    'docgi.documents',
 ]
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -100,7 +100,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.path('apps/templates'),
+            BASE_DIR.path('docgi/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -147,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'apps.authentication.class.DocgiJWTAuthentication',
+        'docgi.auth.class.DocgiJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -212,7 +212,7 @@ SWAGGER_SETTINGS = {
 
 
 ##############################
-# Config for local apps
+# Config for local docgi
 ##############################
 
 # Invitation

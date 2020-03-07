@@ -1,7 +1,7 @@
 from .base import *  # noqa
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-MIDDLEWARE += ['apps.utils.middlewares.ThreadLocalMiddleware']
+MIDDLEWARE += ['docgi.base.middlewares.ThreadLocalMiddleware']
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CORS_ORIGIN_WHITELIST = [
     "http://localhost:3000",
@@ -13,7 +13,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'sql': {
-            '()': 'apps.utils.logging.DocgiLoggingFormatter',
+            '()': 'docgi.utils.logging.DocgiLoggingFormatter',
             'format': '%(statement)s',
         }
     },
