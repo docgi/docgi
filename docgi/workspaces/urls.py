@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework import routers
 
 from . import apps, apis
@@ -18,10 +18,11 @@ router.register(
 )
 
 urlpatterns = [
-    path("workspace/", apis.WorkspaceApi.as_view(), name="workspace-info"), 
-    path("workspaces/check/", apis.CheckWorkspaceView.as_view(), name="check"),
-    path("invitations/sends/", apis.SendInvitationApi.as_view(), name="send-invitation"),
-    path("invitations/join/", apis.JoinInvitationApi.as_view(), name="join-invitation"),
+    re_path(r"workspace/$", apis.WorkspaceApi.as_view(), name="workspace-info"),
+    re_path(r"stats-workspaces/$", apis.StatsWorkspaceAPI.as_view(), name="stats-workspaces"),
+    re_path(r"workspaces/check/$", apis.CheckWorkspaceView.as_view(), name="check"),
+    re_path(r"invitations/sends/$", apis.SendInvitationApi.as_view(), name="send-invitation"),
+    re_path(r"invitations/join/$", apis.JoinInvitationApi.as_view(), name="join-invitation"),
 ]
 
 urlpatterns += router.urls

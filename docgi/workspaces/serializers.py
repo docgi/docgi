@@ -24,6 +24,10 @@ class GetCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
 
+class StatsWorkspaceSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
 class CheckCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     code = serializers.CharField(max_length=LEN_CODE)

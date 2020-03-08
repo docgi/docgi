@@ -44,6 +44,31 @@ class CheckWorkspaceView(APIView):
         return Response(data=result, status=status.HTTP_200_OK)
 
 
+class StatsWorkspaceAPI(APIView):
+    permission_classes = (AllowAny,)
+
+    @swagger_auto_schema(
+        request_body=serializers.StatsWorkspaceSerializer
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = serializers.GetCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_email = serializer.validated_data.get("email")
+        workspaces = models.Workspace.objects.filter(
+            name__in=Subquery(
+                models.WorkspaceMember.objects.filter(
+                    user__email__exact=user_email
+                ).values_list("workspace")
+            )
+        )
+        res = serializers.WorkspacePublicInfoSerializer(
+            instance=workspaces, many=True, context={"view": self, "request": request}
+        ).data
+
+        return Response(res)
+
+
 class CreateWorkspaceApi(GenericViewSet):
     serializer_class = None
     permission_classes = [

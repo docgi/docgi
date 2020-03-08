@@ -13,7 +13,7 @@ router.register(
 )
 
 router.register(
-    r"docs",
+    r"documents",
     apis.DocumentViewSet,
     basename="documents"
 )
