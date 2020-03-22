@@ -4,8 +4,8 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 MIDDLEWARE += ['docgi.base.middlewares.ThreadLocalMiddleware']
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
 ]
 
 LOGGING = {

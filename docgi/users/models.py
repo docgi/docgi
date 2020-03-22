@@ -51,6 +51,7 @@ class User(AbstractUser):
                 email=email, username=username
             )
             user.set_unusable_password()
+            user.save()
         return user
 
     def __str__(self):

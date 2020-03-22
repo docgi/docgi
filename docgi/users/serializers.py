@@ -63,13 +63,13 @@ class UserSetPasswordSerializer(serializers.Serializer):
     password = serializers.CharField(validators=[
         MinLengthValidator(8), MaxLengthValidator(50)
     ])
-    password_confirm = serializers.CharField(validators=[
+    confirm_password = serializers.CharField(validators=[
         MinLengthValidator(8), MaxLengthValidator(50)
     ])
 
     def validate(self, attrs):
-        if attrs["password"] != attrs["password_confirm"]:
-            raise serializers.ValidationError({"password_confirm": "Password and password confirm does not match."})
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError({"confirm_password": "Password and password confirm does not match."})
         return attrs
 
     def create(self, validated_data):
@@ -79,10 +79,12 @@ class UserSetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError({"error": "Password has been set before."})
 
         user.set_password(raw_password=raw_password)
+        user.save()
         return user
 
-    def to_representation(self, instance):
+    def to_representation(self, user):
         ret = dict(
-            user=UserInfoSerializer(instance, context=self.context).data
+            user=UserInfoSerializer(instance=user, context=self.context).data,
+            workspace_name=user.workspace
         )
         return ret

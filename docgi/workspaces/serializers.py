@@ -64,7 +64,6 @@ class CreateWorkspaceSerializer(serializers.Serializer):
             workspace=workspace,
             role=models.WorkspaceMember.MemberRole.ADMIN.value
         )
-        setattr(workspace, "workspace_members", [{"user": member.user_id, "role": member.role}])
         return dict(
             user=user,
             workspace=workspace,
@@ -96,10 +95,8 @@ class WorkspacePublicInfoSerializer(serializers.ModelSerializer):
 class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Workspace
-        fields = ("name", "creator", "created", "members", "logo", "members")
+        fields = ("name", "creator", "created", "members", "logo")
         read_only_fields = ("creator", "name",)
-
-    members = serializers.JSONField(source='workspace_members', read_only=True)
 
 
 class WorkspaceMemberSerializer(serializers.ModelSerializer):
