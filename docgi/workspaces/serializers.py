@@ -95,7 +95,7 @@ class WorkspacePublicInfoSerializer(serializers.ModelSerializer):
 class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Workspace
-        fields = ("name", "creator", "created", "members", "logo")
+        fields = ("name", "creator", "created", "logo")
         read_only_fields = ("creator", "name",)
 
 
