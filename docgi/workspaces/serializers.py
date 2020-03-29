@@ -73,6 +73,8 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         )
 
     def to_representation(self, data):
+        from docgi.auth.serializers import KEY_WORKSPACE_ROLE_OBTAIN_TOKEN, KEY_WORKSPACE_NAME_OBTAIN_TOKEN
+
         user = data.get("user")
         workspace = data.get("workspace")
         member = data.get("member")
@@ -80,9 +82,10 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         ret["user"] = self.InnerUserSerializer(instance=user, context=self.context).data
         ret["token"] = str(DocgiTokenObtainPairSerializer.get_token(
             user=user,
-            workspace=workspace.name,
-            workspace_role=member.role,
-            member_id=member.id
+            **{
+                KEY_WORKSPACE_NAME_OBTAIN_TOKEN: workspace.name,
+                KEY_WORKSPACE_ROLE_OBTAIN_TOKEN: member.role
+            }
         ).access_token)
         ret["workspace"] = WorkspaceSerializer(instance=workspace, context=self.context).data
         return ret
@@ -138,7 +141,7 @@ class SendInvitationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         inviter = self.context["request"].user
-        workspace = self.context["request"].user.workspace
+        workspace = self.context["request"].user.get_jwt_current_workspace_name()
         invitations = validated_data.pop("invitations")
         result = dict()
 

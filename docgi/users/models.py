@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 from docgi.utils import strings
 
@@ -39,32 +40,34 @@ class User(AbstractUser):
 
     def get_jwt_current_workspace_name(self):
         from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
-        return getattr(self, KEY_USER_WORKSPACE_NAME, None)
+        workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
+        if not workspace_name:
+            raise InvalidToken()
+        return workspace_name
 
     def get_jwt_current_workspace_role(self):
         from docgi.auth.jwt import KEY_USER_WORKSPACE_ROLE
-        return getattr(self, KEY_USER_WORKSPACE_ROLE, None)
+        role = getattr(self, KEY_USER_WORKSPACE_ROLE, None)
+        if not role:
+            raise InvalidToken()
+        return role
 
     @cached_property
     def current_workspace(self):
-        from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
         from docgi.workspaces.models import Workspace
 
-        current_workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
         workspace = Workspace.objects.get(
-            name=current_workspace_name
+            name=self.get_jwt_current_workspace_name()
         )
         return workspace
 
     @cached_property
     def current_workspace_member(self):
         from docgi.workspaces.models import WorkspaceMember
-        from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
 
-        current_workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
         member = WorkspaceMember.objects.get(
             user=self,
-            workspace_id__iexact=current_workspace_name
+            workspace=self.get_jwt_current_workspace_name()
         )
         return member
 

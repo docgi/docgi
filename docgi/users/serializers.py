@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
         from docgi.workspaces.models import Workspace
         from docgi.workspaces.serializers import WorkspaceSerializer
 
-        current_workspace = Workspace.objects.get(name__iexact=user.workspace)
+        current_workspace = user.current_workspace
         return WorkspaceSerializer(
             instance=current_workspace,
             context=self.context
@@ -98,9 +98,9 @@ class UserSetPasswordSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         pass
 
-    def to_representation(self, user):
+    def to_representation(self, user: models.User):
         ret = dict(
             user=UserInfoSerializer(instance=user, context=self.context).data,
-            workspace_name=user.workspace
+            workspace_name=user.get_jwt_current_workspace_name()
         )
         return ret

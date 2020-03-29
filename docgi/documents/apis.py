@@ -98,7 +98,7 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
             )
         )
         return self.queryset.filter(
-            Q(collection__workspace=getattr(self.request.user, 'workspace')) &
+            Q(collection__workspace=self.request.user.get_jwt_current_workspace_name()) &
             Q(
                 Q(collection__private=False) |
                 Q(collection__private=True, collection__creator=self.request.user)
