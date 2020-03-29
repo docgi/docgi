@@ -9,6 +9,7 @@ CORS_ORIGIN_WHITELIST = [
 ]
 CORS_ORIGIN_REGEX_WHITELIST = [
     r"http://.*.localhost:8080",
+    r"http://.*.192.168.1.11:8080",
 ]
 
 LOGGING = {

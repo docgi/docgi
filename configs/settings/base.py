@@ -147,7 +147,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'docgi.auth.class.DocgiJWTAuthentication',
+        'docgi.auth.jwt.DocgiJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

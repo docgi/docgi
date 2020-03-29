@@ -5,6 +5,10 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshT
 from docgi.workspaces.models import WorkspaceMember
 
 
+KEY_WORKSPACE_NAME_OBTAIN_TOKEN = "workspace_name"
+KEY_WORKSPACE_ROLE_OBTAIN_TOKEN = "workspace_role"
+
+
 class DocgiTokenObtainPairSerializer(TokenObtainSerializer):
     workspace = SlugField(required=True)
 
@@ -20,15 +24,17 @@ class DocgiTokenObtainPairSerializer(TokenObtainSerializer):
         data = super().validate(attrs)
         try:
             workspace_member = WorkspaceMember.objects.get(
-                user_id=self.user.id, workspace__name__iexact=workspace
+                user_id=self.user.id,
+                workspace__name__iexact=workspace
             )
         except WorkspaceMember.DoesNotExist:
             raise AuthenticationFailed()
         refresh = self.get_token(
             self.user,
-            workspace=workspace_member.workspace_id,
-            member_id=workspace_member.id,
-            workspace_role=workspace_member.role,
+            **{
+                KEY_WORKSPACE_NAME_OBTAIN_TOKEN: workspace_member.workspace_id,
+                KEY_WORKSPACE_ROLE_OBTAIN_TOKEN: workspace_member.role
+            }
         )
         data["token"] = str(refresh.access_token)
 

@@ -156,7 +156,7 @@ class WorkspaceApi(RetrieveUpdateAPIView):
 
     def get_object(self):
         return models.Workspace.objects.filter(
-            name=self.request.user.workspace
+            name=self.request.user.current_workspace.name
         ).annotate(
             workspace_members=Subquery(
                 models.WorkspaceMember.objects.filter(
@@ -186,11 +186,11 @@ class WorkspaceMemberAPI(ListModelMixin, UpdateModelMixin, GenericViewSet):
     ]
     serializer_class = serializers.WorkspaceMemberSerializer
     lookup_field = "user"
-    lookup_value_regex = "\d+"
+    lookup_value_regex = r"\d+"
 
     def get_queryset(self):
         return self.queryset.filter(
-            workspace_id__exact=self.request.user.workspace
+            workspace_id__exact=self.request.user.get_jwt_current_workspace_name()
         )
 
 

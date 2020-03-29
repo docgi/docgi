@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.files.storage import get_storage_class
 from django.db import models
+from django.utils.functional import cached_property
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFill
 
@@ -35,6 +36,37 @@ class User(AbstractUser):
                                  format="JPEG",
                                  options={"quality": 90},
                                  blank=True)
+
+    def get_jwt_current_workspace_name(self):
+        from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
+        return getattr(self, KEY_USER_WORKSPACE_NAME, None)
+
+    def get_jwt_current_workspace_role(self):
+        from docgi.auth.jwt import KEY_USER_WORKSPACE_ROLE
+        return getattr(self, KEY_USER_WORKSPACE_ROLE, None)
+
+    @cached_property
+    def current_workspace(self):
+        from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
+        from docgi.workspaces.models import Workspace
+
+        current_workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
+        workspace = Workspace.objects.get(
+            name=current_workspace_name
+        )
+        return workspace
+
+    @cached_property
+    def current_workspace_member(self):
+        from docgi.workspaces.models import WorkspaceMember
+        from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
+
+        current_workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
+        member = WorkspaceMember.objects.get(
+            user=self,
+            workspace_id__iexact=current_workspace_name
+        )
+        return member
 
     @classmethod
     def get_or_create(cls, email: str):

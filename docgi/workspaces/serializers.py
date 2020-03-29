@@ -2,6 +2,7 @@ from os import path
 
 from django.conf import settings as app_settings
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.http import Http404
 from rest_framework import serializers
 
@@ -53,6 +54,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
             raise serializers.ValidationError("Workspace with that name already exists.")
         return workspace_name
 
+    @transaction.atomic
     def create(self, validated_data):
         user = User.get_or_create(email=validated_data["email"])
         workspace = models.Workspace.objects.create(
@@ -111,7 +113,7 @@ class SendInvitationSerializer(serializers.Serializer):
     class InnerInvitationSerializer(serializers.Serializer):
         email = serializers.EmailField(required=True)
         workspace_role = serializers.ChoiceField(choices=models.WorkspaceMember.MemberRole.to_choices(),
-                                                 default=models.WorkspaceMember.MemberRole.MEMBER.value)
+                                                 default=models.WorkspaceMember.MemberRole.MEMBER)
 
     invitations = serializers.ListField(
         child=InnerInvitationSerializer(), required=True, allow_empty=False, allow_null=False
