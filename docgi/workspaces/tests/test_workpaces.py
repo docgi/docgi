@@ -38,7 +38,8 @@ class TestWorkspace(DocgiTestCase):
                 "logo": f
             }
             res = self.put(self.url_workspace,
-                           data=payload, status_code=status.HTTP_200_OK, content_type=MULTIPART_CONTENT)
+                           data=payload, status_code=status.HTTP_200_OK,
+                           content_type=MULTIPART_CONTENT)
             self.assertIsNotNone(res.data["logo"])
 
     def test_update_workspace_name(self):

@@ -40,8 +40,6 @@ class UserSerializer(serializers.ModelSerializer):
         return username
 
 
-
-
 class ChangePasswordSerializer(serializers.Serializer):
     old_pass = serializers.CharField(max_length=150)
     new_pass = serializers.CharField(max_length=150, min_length=8)
