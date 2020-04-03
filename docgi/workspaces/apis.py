@@ -136,8 +136,8 @@ class CreateWorkspaceApi(GenericViewSet):
         )
         mailer.send_mail(subject=subject,
                          email=email,
-                         text_template="email/getcode/email.txt",
-                         html_template="email/getcode/email.html",
+                         text_template_path="email/getcode/email.txt",
+                         html_template_path="email/getcode/email.html",
                          context=ctx)
 
     @classmethod

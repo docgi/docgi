@@ -1,4 +1,5 @@
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication, JWTTokenUserAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 from .serializers import KEY_WORKSPACE_NAME_OBTAIN_TOKEN, KEY_WORKSPACE_ROLE_OBTAIN_TOKEN
 

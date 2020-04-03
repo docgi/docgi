@@ -135,8 +135,8 @@ class SendInvitationSerializer(serializers.Serializer):
             )
             send_mail(subject="Invitation",
                       email=instance.email,
-                      html_template="email/invitation/invitation.html",
-                      text_template="email/invitation/invitation.txt",
+                      html_template_path="email/invitation/invitation.html",
+                      text_template_path="email/invitation/invitation.txt",
                       context=ctx)
 
     def create(self, validated_data):

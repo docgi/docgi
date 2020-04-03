@@ -2,13 +2,15 @@ import uuid as uuid
 from os import path
 from typing import Sequence
 
-from django.conf import settings as app_settings
+from django.conf import settings as app_settings, settings
 from django.contrib.auth import get_user_model
 from django.core.files.storage import get_storage_class
 from django.db import models
 from django.db.models import UniqueConstraint, Q
 from django.utils.timezone import timedelta, now
+from imagekit.models import ProcessedImageField
 from model_utils.models import TimeStampedModel, SoftDeletableModel
+from pilkit.processors import ResizeToFill
 from rest_framework.exceptions import ValidationError
 
 from docgi.base.models import Choices
@@ -32,10 +34,15 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
                             max_length=128,
                             db_index=True,
                             editable=False)
-    logo = models.FileField(storage=storage,
-                            upload_to=logo_path,
-                            null=True,
-                            blank=True)
+    logo = ProcessedImageField(upload_to=logo_path,
+                               storage=storage,
+                               processors=[ResizeToFill(
+                                   width=settings.AVATAR_THUMBNAIL_WIDTH,
+                                   height=settings.AVATAR_THUMBNAIL_HEIGHT
+                               )],
+                               format="JPEG",
+                               options={"quality": 90},
+                               blank=True)
 
     creator = models.ForeignKey(User, on_delete=models.PROTECT, related_name="own_workspaces")
 

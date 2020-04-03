@@ -17,11 +17,15 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "email", "username", "avatar", "current_workspace")
         read_only_fields = ("email",)
         only_on_update_fields = ("username",)
+        extra_kwargs = {
+            "username": {
+                "required": False
+            }
+        }
 
     current_workspace = serializers.SerializerMethodField()
 
     def get_current_workspace(self, user: models.User):
-        from docgi.workspaces.models import Workspace
         from docgi.workspaces.serializers import WorkspaceSerializer
 
         current_workspace = user.current_workspace
@@ -29,7 +33,6 @@ class UserSerializer(serializers.ModelSerializer):
             instance=current_workspace,
             context=self.context
         ).data
-
 
     def validate_username(self, username):
         checker = models.User.objects.filter(
@@ -92,9 +95,6 @@ class UserSetPasswordSerializer(serializers.Serializer):
         user.set_password(raw_password=raw_password)
         user.save()
         return user
-
-    def update(self, instance, validated_data):
-        pass
 
     def to_representation(self, user: models.User):
         ret = dict(
