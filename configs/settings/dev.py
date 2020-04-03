@@ -1,5 +1,6 @@
 from .base import *  # noqa
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000"
+CORS_ORIGIN_REGEX_WHITELIST = [
+    r"http://.*.nakhoa.me",
+    r"http://.*.nakhoa.me",
 ]
