@@ -42,7 +42,7 @@ class TestWorkspace(DocgiTestCase):
                            content_type=MULTIPART_CONTENT)
             self.assertIsNotNone(res.data["logo"])
 
-    def test_update_workspace_name(self):
+    def test_make_sure_workspace_name_can_not_modify(self):
         new_name = self.workspace.name + "new-name"
         payload = {
             "name": new_name

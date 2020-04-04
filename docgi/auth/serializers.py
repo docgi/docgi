@@ -75,12 +75,12 @@ class ForgotPasswordSerializer(Serializer):
         client_origin = validated_data.get("client_origin")
 
         user = User.objects.get(email__exact=email)
-        quick_token = DocgiTokenObtainPairSerializer.get_token(
+        reset_token = DocgiTokenObtainPairSerializer.get_token(
             user=user,
             is_reset=True,
             **{KEY_WORKSPACE_NAME_OBTAIN_TOKEN: workspace}
         )
-        reset_link = urljoin(client_origin, f"{FRONTEND_URL_RESET_PASS}?token={quick_token}")
+        reset_link = urljoin(client_origin, f"{FRONTEND_URL_RESET_PASS}?token={reset_token}")
 
         context = dict(
             email=email,

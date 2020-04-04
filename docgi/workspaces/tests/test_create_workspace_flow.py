@@ -67,3 +67,36 @@ class TestCreateWorkSpaceFlow(DocgiTestCase):
         res = self.post(url_set_pass, data=payload, status_code=status.HTTP_200_OK)
         self.assertIsNotNone(res.data["user"])
         self.assertEqual(res.data["workspace_name"], self._workspace_name)
+
+    def test_flow_create_with_uppercase(self):
+        # Step 1: Get code.
+        url_get_code = reverse("workspaces:create-workspace-get-code")
+        payload = {
+            "email": self._creator_email
+        }
+        self.post(path=url_get_code, data=payload, status_code=status.HTTP_200_OK)
+        get_code_email = mail.outbox.pop()
+        code = parse_email_get_code(get_code_email.body)
+
+        # Step 2: Check code.
+        payload.update(code=code)
+        url_check_code = reverse("workspaces:create-workspace-check-code")
+        self.post(path=url_check_code, data=payload, status_code=status.HTTP_200_OK)
+
+        # Step 3: Put all together and create workspace.
+        workspace_name = "WORKSPACE"
+        payload.update(workspace_name=workspace_name)
+        url_create_workspace = reverse("workspaces:create-workspace-create-workspace")
+        res = self.post(path=url_create_workspace, data=payload)
+        self.assertIsNotNone(res.data["token"])
+        self.assertIsNotNone(res.data["user"])
+        self.assertTrue(res.data["user"]["need_pass"])
+        self.assertEqual(res.data["workspace"]["name"], workspace_name.lower())
+
+        # Validate in database
+        from docgi.workspaces.models import Workspace
+        exist = Workspace.objects.filter(name=workspace_name.lower()).exists()
+        self.assertTrue(exist)
+
+        not_exist = Workspace.objects.filter(name=workspace_name).exists()
+        self.assertFalse(not_exist)
