@@ -14,7 +14,7 @@ User = get_user_model()
 
 KEY_WORKSPACE_NAME_OBTAIN_TOKEN = "workspace_name"
 KEY_WORKSPACE_ROLE_OBTAIN_TOKEN = "workspace_role"
-FRONTEND_URL_RESET_PASS = "/reset-password"
+FRONTEND_URL_RESET_PASS = "auth/reset-password"
 
 
 class DocgiTokenObtainPairSerializer(TokenObtainSerializer):

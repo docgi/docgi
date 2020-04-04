@@ -50,6 +50,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
     workspace_name = serializers.SlugField(required=True, write_only=True)
 
     def validate_workspace_name(self, workspace_name: str) -> str:
+        workspace_name = workspace_name.lower()
         if models.Workspace.objects.filter(name__iexact=workspace_name).exists():
             raise serializers.ValidationError("Workspace with that name already exists.")
         return workspace_name
