@@ -18,7 +18,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         current_user = self.request.user
-        workspace_id = current_user.get_jwt_current_workspace_name()
+        workspace_id = current_user.get_current_workspace_name()
 
         private_coll_qs = models.Collection.members.through.objects.filter(
             user=self.request.user,
@@ -69,7 +69,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
             )
 
         return self.queryset.filter(
-            Q(workspace_id=self.request.user.get_jwt_current_workspace_name()) &
+            Q(workspace_id=self.request.user.get_current_workspace_name()) &
             Q(
                 Q(private=False) |
                 Q(
@@ -98,7 +98,7 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
             )
         )
         return self.queryset.filter(
-            Q(collection__workspace=self.request.user.get_jwt_current_workspace_name()) &
+            Q(collection__workspace=self.request.user.get_current_workspace_name()) &
             Q(
                 Q(collection__private=False) |
                 Q(collection__private=True, collection__creator=self.request.user)

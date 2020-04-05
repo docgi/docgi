@@ -56,7 +56,7 @@ class CollectionSerializer(ExtraReadOnlyField,
         view = self.context["view"]
         request = self.context["request"]
         checker = models.Collection.objects.filter(
-            name__iexact=name, workspace_id=request.user.get_jwt_current_workspace_name()
+            name__iexact=name, workspace_id=request.user.get_current_workspace_name()
         )
         if view.action in UPDATE_ACTIONS:
             checker = checker.exclude(id=view.kwargs.get("pk"))
@@ -69,7 +69,7 @@ class CollectionSerializer(ExtraReadOnlyField,
     def validate_parent(self, parent: models.Collection):
         request = self.context["request"]
         view = self.context["view"]
-        current_workspace = request.user.get_jwt_current_workspace_name()
+        current_workspace = request.user.get_current_workspace_name()
         if parent.workspace_id != current_workspace:
             raise serializers.ValidationError("Invalid parent")
 
@@ -80,7 +80,7 @@ class CollectionSerializer(ExtraReadOnlyField,
         return parent
 
     def validate_members(self, members: Sequence[int]) -> Sequence[int]:
-        workspace_id = self.context["request"].user.get_jwt_current_workspace_name()
+        workspace_id = self.context["request"].user.get_current_workspace_name()
         return WorkspaceMember.validate_members(
             workspace_id=workspace_id,
             user_ids=members
@@ -88,7 +88,7 @@ class CollectionSerializer(ExtraReadOnlyField,
 
     def create(self, validated_data: dict):
         user = self.context["request"].user
-        workspace_id = self.context["request"].user.get_jwt_current_workspace_name()
+        workspace_id = self.context["request"].user.get_current_workspace_name()
 
         validated_data.update(
             creator=user,
@@ -115,7 +115,7 @@ class DocumentSerializer(FlexToPresentMixin,
     star = serializers.IntegerField(read_only=True, default=0)
 
     def validate_collection(self, collection):
-        current_workspace = self.context["request"].user.get_jwt_current_workspace_name()
+        current_workspace = self.context["request"].user.get_current_workspace_name()
         if collection.workspace_id != current_workspace:
             raise serializers.ValidationError()
         return collection

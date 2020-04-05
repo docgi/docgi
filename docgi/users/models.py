@@ -38,14 +38,14 @@ class User(AbstractUser):
                                  options={"quality": 90},
                                  blank=True)
 
-    def get_jwt_current_workspace_name(self):
+    def get_current_workspace_name(self):
         from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
         workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
         if not workspace_name:
             raise InvalidToken()
         return workspace_name
 
-    def get_jwt_current_workspace_role(self):
+    def get_current_workspace_role(self):
         from docgi.auth.jwt import KEY_USER_WORKSPACE_ROLE
         role = getattr(self, KEY_USER_WORKSPACE_ROLE, None)
         if not role:
@@ -57,7 +57,7 @@ class User(AbstractUser):
         from docgi.workspaces.models import Workspace
 
         workspace = Workspace.objects.get(
-            name=self.get_jwt_current_workspace_name()
+            name=self.get_current_workspace_name()
         )
         return workspace
 
@@ -67,7 +67,7 @@ class User(AbstractUser):
 
         member = WorkspaceMember.objects.get(
             user=self,
-            workspace=self.get_jwt_current_workspace_name()
+            workspace=self.get_current_workspace_name()
         )
         return member
 

@@ -99,6 +99,6 @@ class UserSetPasswordSerializer(serializers.Serializer):
     def to_representation(self, user: models.User):
         ret = dict(
             user=UserInfoSerializer(instance=user, context=self.context).data,
-            workspace_name=user.get_jwt_current_workspace_name()
+            workspace_name=user.get_current_workspace_name()
         )
         return ret

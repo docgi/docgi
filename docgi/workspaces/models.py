@@ -37,11 +37,11 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
     logo = ProcessedImageField(upload_to=logo_path,
                                storage=storage,
                                processors=[ResizeToFill(
-                                   width=settings.AVATAR_THUMBNAIL_WIDTH,
-                                   height=settings.AVATAR_THUMBNAIL_HEIGHT
+                                   width=settings.WORKSPACE_LOGO_THUMBNAIL_WIDTH,
+                                   height=settings.WORKSPACE_LOGO_THUMBNAIL_HEIGHT
                                )],
                                format="JPEG",
-                               options={"quality": 90},
+                               options={"quality": 100},
                                blank=True)
 
     creator = models.ForeignKey(User, on_delete=models.PROTECT, related_name="own_workspaces")
@@ -58,7 +58,7 @@ class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
     workspace = models.ForeignKey(Workspace,
                                   on_delete=models.CASCADE,
                                   related_name="members")
-    user = models.ForeignKey("users.User",
+    user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name="workspace_member_sets")
     role = models.PositiveSmallIntegerField(choices=MemberRole.to_choices(),

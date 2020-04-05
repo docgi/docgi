@@ -117,7 +117,7 @@ class SendInvitationSerializer(serializers.Serializer):
     class InnerInvitationSerializer(serializers.Serializer):
         email = serializers.EmailField(required=True)
         workspace_role = serializers.ChoiceField(choices=models.WorkspaceMember.MemberRole.to_choices(),
-                                                 default=models.WorkspaceMember.MemberRole.MEMBER)
+                                                 default=models.WorkspaceMember.MemberRole.MEMBER.value)
 
     invitations = serializers.ListField(
         child=InnerInvitationSerializer(), required=True, allow_empty=False, allow_null=False
@@ -140,9 +140,16 @@ class SendInvitationSerializer(serializers.Serializer):
                       text_template_path="email/invitation/invitation.txt",
                       context=ctx)
 
+    def validate_invitations(self, invitations):
+        for it in invitations:
+            count = sum(it["email"] == _it["email"] for _it in invitations)
+            if count > 1:
+                raise serializers.ValidationError({"invitations": ["Contains duplicate emails."]})
+        return invitations
+
     def create(self, validated_data):
         inviter = self.context["request"].user
-        workspace = self.context["request"].user.get_jwt_current_workspace_name()
+        workspace = self.context["request"].user.get_current_workspace_name()
         invitations = validated_data.pop("invitations")
         result = dict()
 
@@ -203,7 +210,8 @@ class JoinInvitationSerializer(serializers.Serializer):
         if invitation.is_expire():
             raise serializers.ValidationError("Invitation is expired.")
 
-        # In case exist invitation, collect workspace id, email and role and create WorkspaceMember,
+        # In case exist invitation, collect workspace id,
+        # email and role and create WorkspaceMember,
         # After all mark `invitation` activate is False
         workspace_id = invitation.workspace_id
         workspace = models.Workspace.objects.get(pk=workspace_id)

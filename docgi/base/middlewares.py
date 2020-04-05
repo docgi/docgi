@@ -3,7 +3,7 @@ from django.utils.deprecation import MiddlewareMixin
 from docgi.utils.logging import _thread_locals
 
 
-class ThreadLocalMiddleware(MiddlewareMixin):	
+class ThreadLocalMiddleware(MiddlewareMixin):
     def __init__(self, get_response):	
         self.get_response = get_response
 

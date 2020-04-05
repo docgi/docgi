@@ -190,7 +190,7 @@ class WorkspaceMemberAPI(ListModelMixin, UpdateModelMixin, GenericViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(
-            workspace_id__exact=self.request.user.get_jwt_current_workspace_name()
+            workspace_id__exact=self.request.user.get_current_workspace_name()
         )
 
 
