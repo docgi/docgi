@@ -30,7 +30,7 @@ SECRET_KEY = 'z0$c1mon$!19@8v^2n)s_sbbdagah_$g5samh5p5*n@wjqybf^'
 DEBUG = env.bool('DEBUG', False)
 
 HOST_NAME = env.str('HOST_NAME', 'https://nakhoa.me')
-FRONT_END_HOST_NAME = env.str('FRONT_END_HOST_NAME', HOST_NAME)
+FRONT_END_HOST_NAME = env.str('FRONT_END_HOST_NAME')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', [])
 

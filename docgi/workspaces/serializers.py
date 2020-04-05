@@ -126,6 +126,7 @@ class SendInvitationSerializer(serializers.Serializer):
     def _send_invite(self, instances):
         for instance in instances:
             link_join = path.join(*[app_settings.FRONT_END_HOST_NAME,
+                                    instance.workspace.name,
                                     URL_FRONT_END_JOIN_INVITE,
                                     str(instance.uuid)])
             ctx = dict(
@@ -234,10 +235,9 @@ class JoinInvitationSerializer(serializers.Serializer):
         user = data.get("user")
         workspace = data.get("workspace")
         ret = dict(
-            user=UserSerializer(instance=data["user"]).data,
             token=str(DocgiTokenObtainPairSerializer.get_token(
                 user=user, workspace=workspace.name
             ).access_token),
-            workspace=WorkspaceSerializer(instance=workspace).data
+            need_pass=user.has_usable_password()
         )
         return ret

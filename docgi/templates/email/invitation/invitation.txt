@@ -1,1 +1,7 @@
-Hello {{ email }}
+Hello {{ email }}!
+
+You have been invited in to {{ workspace }} by {{ inviter }}.
+
+Link {{ link_join }}
+
+Thanks!
