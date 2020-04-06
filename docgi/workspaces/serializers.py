@@ -199,17 +199,20 @@ class SendInvitationSerializer(serializers.Serializer):
 
 class JoinInvitationSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(write_only=True, required=True)
+    workspace = serializers.SlugField(required=True)
 
+    @transaction.atomic
     def create(self, validated_data):
         uuid = validated_data.pop("uuid")
+        workspace = validated_data.pop("workspace")
         invitation = models.Invitation.objects.filter(
-            uuid=uuid, activate=True
+            uuid=uuid, activate=True, workspace_id=workspace
         ).first()
         if invitation is None:
             raise Http404()
 
         if invitation.is_expire():
-            raise serializers.ValidationError("Invitation is expired.")
+            raise serializers.ValidationError({"uuid": ["Invitation is expired."]})
 
         # In case exist invitation, collect workspace id,
         # email and role and create WorkspaceMember,

@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import re_path
 from rest_framework import routers
 
 from . import apps, apis
@@ -23,6 +23,7 @@ urlpatterns = [
     re_path(r"workspaces/check/$", apis.CheckWorkspaceView.as_view(), name="check"),
     re_path(r"invitations/sends/$", apis.SendInvitationApi.as_view(), name="send-invitation"),
     re_path(r"invitations/join/$", apis.JoinInvitationApi.as_view(), name="join-invitation"),
+    re_path(r"invitations/check/$", apis.CheckInvitationApi.as_view(), name="check-invitation"),
 ]
 
 urlpatterns += router.urls

@@ -3,6 +3,7 @@ from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
 from django.db.models import Subquery, OuterRef
 from django.db.models.expressions import RawSQL
+from django.core.exceptions import ValidationError as FieldValidationError
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, parsers
 from rest_framework.decorators import action
@@ -202,3 +203,26 @@ class SendInvitationApi(CreateAPIView):
 class JoinInvitationApi(CreateAPIView):
     serializer_class = serializers.JoinInvitationSerializer
     permission_classes = (AllowAny,)
+
+
+class CheckInvitationApi(APIView):
+    permission_classes = (AllowAny,)
+
+    @swagger_auto_schema(
+        request_body=serializers.JoinInvitationSerializer
+    )
+    def post(self, request, **kwargs):
+        workspace = request.data.get("workspace")
+        uuid = request.data.get("uuid")
+
+        try:
+            checker = models.Invitation.objects.filter(
+                workspace_id=workspace,
+                uuid=uuid
+            )
+            if not checker.exists():
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        except FieldValidationError:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(status=status.HTTP_200_OK)
