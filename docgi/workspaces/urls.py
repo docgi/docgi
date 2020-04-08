@@ -19,6 +19,7 @@ router.register(
 
 urlpatterns = [
     re_path(r"workspace/$", apis.WorkspaceApi.as_view(), name="workspace-info"),
+    re_path(r"app-configs", apis.AppConfigsApi.as_view(), name="app-configs"),
     re_path(r"stats-workspaces/$", apis.StatsWorkspaceAPI.as_view(), name="stats-workspaces"),
     re_path(r"workspaces/check/$", apis.CheckWorkspaceView.as_view(), name="check"),
     re_path(r"invitations/sends/$", apis.SendInvitationApi.as_view(), name="send-invitation"),

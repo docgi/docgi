@@ -36,7 +36,7 @@ class DocgiTestCase(APITestCase):
                                                  creator=cls.creator)
         cls.workspace.members.create(user=cls.creator,
                                      workspace=cls.workspace,
-                                     role=WorkspaceMember.MemberRole.ADMIN.value)
+                                     role=WorkspaceMember.WorkspaceMemberRole.ADMIN.value)
 
         cls.member1 = User.objects.create_user(
             email="u1@email.com",
@@ -61,7 +61,7 @@ class DocgiTestCase(APITestCase):
         for user in [cls.member1, cls.member2, cls.member3, cls.member4]:
             cls.workspace.members.create(user=user,
                                          workspace=cls.workspace,
-                                         role=WorkspaceMember.MemberRole.MEMBER.value)
+                                         role=WorkspaceMember.WorkspaceMemberRole.MEMBER.value)
 
     def setUp(self) -> None:
         self.make_login(self.creator)

@@ -65,7 +65,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         member = models.WorkspaceMember.objects.create(
             user=user,
             workspace=workspace,
-            role=models.WorkspaceMember.MemberRole.ADMIN.value
+            role=models.WorkspaceMember.WorkspaceMemberRole.ADMIN.value
         )
         return dict(
             user=user,
@@ -116,8 +116,8 @@ class WorkspaceMemberSerializer(serializers.ModelSerializer):
 class SendInvitationSerializer(serializers.Serializer):
     class InnerInvitationSerializer(serializers.Serializer):
         email = serializers.EmailField(required=True)
-        workspace_role = serializers.ChoiceField(choices=models.WorkspaceMember.MemberRole.to_choices(),
-                                                 default=models.WorkspaceMember.MemberRole.MEMBER.value)
+        workspace_role = serializers.ChoiceField(choices=models.WorkspaceMember.WorkspaceMemberRole.to_choices(),
+                                                 default=models.WorkspaceMember.WorkspaceMemberRole.MEMBER.value)
 
     invitations = serializers.ListField(
         child=InnerInvitationSerializer(), required=True, allow_empty=False, allow_null=False

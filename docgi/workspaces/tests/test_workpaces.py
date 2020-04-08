@@ -65,7 +65,7 @@ class TestInvitation(DocgiTestCase):
                 },
                 {
                     "email": "1@email.com",
-                    "role": WorkspaceMember.MemberRole.ADMIN.value
+                    "role": WorkspaceMember.WorkspaceMemberRole.ADMIN.value
                 }
             ]
         }
@@ -120,11 +120,11 @@ class TestInvitation(DocgiTestCase):
             "invitations": [
                 {
                     "email": "1@email.com",
-                    "role": WorkspaceMember.MemberRole.MEMBER.value
+                    "role": WorkspaceMember.WorkspaceMemberRole.MEMBER.value
                 },
                 {
                     "email": "1@email.com",
-                    "role": WorkspaceMember.MemberRole.ADMIN.value
+                    "role": WorkspaceMember.WorkspaceMemberRole.ADMIN.value
                 }
             ]
         }

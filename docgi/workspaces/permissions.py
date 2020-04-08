@@ -33,7 +33,7 @@ class IsAdminWorkspace(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         if user.is_authenticated:
-            return user.get_current_workspace_role() == WorkspaceMember.MemberRole.ADMIN.value
+            return user.get_current_workspace_role() == WorkspaceMember.WorkspaceMemberRole.ADMIN.value
         return False
 
 

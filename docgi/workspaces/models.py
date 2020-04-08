@@ -51,7 +51,7 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
 
 
 class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
-    class MemberRole(Choices):
+    class WorkspaceMemberRole(Choices):
         ADMIN = 1
         MEMBER = 2
 
@@ -61,8 +61,8 @@ class WorkspaceMember(SoftDeletableModel, TimeStampedModel):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name="workspace_member_sets")
-    role = models.PositiveSmallIntegerField(choices=MemberRole.to_choices(),
-                                            default=MemberRole.MEMBER.value)
+    role = models.PositiveSmallIntegerField(choices=WorkspaceMemberRole.to_choices(),
+                                            default=WorkspaceMemberRole.MEMBER.value)
 
     @classmethod
     def validate_members(cls, workspace_id: str, user_ids: Sequence[int]) -> Sequence[int]:
@@ -111,8 +111,8 @@ class Invitation(TimeStampedModel):
 
     workspace = models.ForeignKey("workspaces.Workspace",
                                   on_delete=models.CASCADE)
-    workspace_role = models.PositiveSmallIntegerField(choices=WorkspaceMember.MemberRole.to_choices(),
-                                                      default=WorkspaceMember.MemberRole.MEMBER.value)
+    workspace_role = models.PositiveSmallIntegerField(choices=WorkspaceMember.WorkspaceMemberRole.to_choices(),
+                                                      default=WorkspaceMember.WorkspaceMemberRole.MEMBER.value)
 
     inviter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 

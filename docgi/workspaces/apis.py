@@ -1,9 +1,9 @@
 from django.conf import settings as app_settings
 from django.contrib.postgres.fields import JSONField
 from django.core.cache import cache
+from django.core.exceptions import ValidationError as FieldValidationError
 from django.db.models import Subquery, OuterRef
 from django.db.models.expressions import RawSQL
-from django.core.exceptions import ValidationError as FieldValidationError
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, parsers
 from rest_framework.decorators import action
@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from docgi.utils import strings, mailer
+from docgi.base.models import Choices
 from . import models, serializers, permissions
 
 HOST_NAME = app_settings.HOST_NAME
@@ -226,3 +227,26 @@ class CheckInvitationApi(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class AppConfigsApi(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, **kwargs):
+        all_choices = Choices.__subclasses__()
+
+        result = dict()
+        for ch in all_choices:
+            ch_items = []
+
+            for key, val in ch.__members__.items():
+                text = " ".join(key.split("_")).title()
+                value = val.value
+                ch_items.append(dict(
+                    text=text,
+                    value=value
+                ))
+
+            result[ch.__name__] = ch_items
+
+        return Response(data=result, status=status.HTTP_200_OK)
