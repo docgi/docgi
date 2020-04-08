@@ -6,11 +6,13 @@ volumes:
 
 services:
   redis:
-    image: redis
+    image: bitnami/redis:latest
     ports:
       - 6379:6379
     volumes:
-      - redis_data:/data
+      - redis_data:/bitnami/redis/data
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
 
   postgres:
     image: postgres:12.0-alpine
