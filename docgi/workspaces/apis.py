@@ -16,8 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from docgi.utils import strings, mailer
-from docgi.base.models import Choices
-from . import models, serializers, permissions
+from . import models, serializers, permissions, utils
 
 HOST_NAME = app_settings.HOST_NAME
 
@@ -47,28 +46,32 @@ class CheckWorkspaceView(APIView):
 
 
 class StatsWorkspaceAPI(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [permissions.IsMemberWorkspace]
 
-    @swagger_auto_schema(
-        request_body=serializers.StatsWorkspaceSerializer
-    )
-    def post(self, request, *args, **kwargs):
-        serializer = serializers.GetCodeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def get(self, request, **kwargs):
+        from docgi.users.serializers import UserInfoSerializer
 
-        user_email = serializer.validated_data.get("email")
-        workspaces = models.Workspace.objects.filter(
-            name__in=Subquery(
-                models.WorkspaceMember.objects.filter(
-                    user__email__exact=user_email
-                ).values_list("workspace")
-            )
+        context = dict(
+            request=request,
+            view=self
         )
-        res = serializers.WorkspacePublicInfoSerializer(
-            instance=workspaces, many=True, context={"view": self, "request": request}
-        ).data
 
-        return Response(res)
+        user = request.user
+        user_data = UserInfoSerializer(
+            instance=user,
+            context=context
+        ).data
+        workspace = serializers.WorkspaceSerializer(
+            instance=user.current_workspace
+        ).data
+        app_config_data = utils.get_app_config()
+        data = dict(
+            user=user_data,
+            workspace=workspace,
+            config=app_config_data
+        )
+
+        return Response(data=data)
 
 
 class CreateWorkspaceApi(GenericViewSet):
@@ -233,20 +236,5 @@ class AppConfigsApi(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, **kwargs):
-        all_choices = Choices.__subclasses__()
-
-        result = dict()
-        for ch in all_choices:
-            ch_items = []
-
-            for key, val in ch.__members__.items():
-                text = " ".join(key.split("_")).title()
-                value = val.value
-                ch_items.append(dict(
-                    text=text,
-                    value=value
-                ))
-
-            result[ch.__name__] = ch_items
-
-        return Response(data=result, status=status.HTTP_200_OK)
+        data = utils.get_app_config()
+        return Response(data=data, status=status.HTTP_200_OK)

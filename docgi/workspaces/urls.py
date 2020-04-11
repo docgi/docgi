@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import path
 from rest_framework import routers
 
 from . import apps, apis
@@ -18,13 +18,13 @@ router.register(
 )
 
 urlpatterns = [
-    re_path(r"workspace/$", apis.WorkspaceApi.as_view(), name="workspace-info"),
-    re_path(r"app-configs", apis.AppConfigsApi.as_view(), name="app-configs"),
-    re_path(r"stats-workspaces/$", apis.StatsWorkspaceAPI.as_view(), name="stats-workspaces"),
-    re_path(r"workspaces/check/$", apis.CheckWorkspaceView.as_view(), name="check"),
-    re_path(r"invitations/sends/$", apis.SendInvitationApi.as_view(), name="send-invitation"),
-    re_path(r"invitations/join/$", apis.JoinInvitationApi.as_view(), name="join-invitation"),
-    re_path(r"invitations/check/$", apis.CheckInvitationApi.as_view(), name="check-invitation"),
+    path("workspace/", apis.WorkspaceApi.as_view(), name="workspace-info"),
+    path("app-configs/", apis.AppConfigsApi.as_view(), name="app-configs"),
+    path("stats-workspace/", apis.StatsWorkspaceAPI.as_view(), name="stats-workspaces"),
+    path("workspaces/check/", apis.CheckWorkspaceView.as_view(), name="check"),
+    path("invitations/sends/", apis.SendInvitationApi.as_view(), name="send-invitation"),
+    path("invitations/join/", apis.JoinInvitationApi.as_view(), name="join-invitation"),
+    path("invitations/check/", apis.CheckInvitationApi.as_view(), name="check-invitation"),
 ]
 
 urlpatterns += router.urls

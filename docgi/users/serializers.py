@@ -7,14 +7,14 @@ from . import models
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = ("id", "avatar")
+        fields = ("id", "avatar", "email", "username")
         read_only_fields = ("id", "avatar")
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = ("id", "email", "username", "avatar", "current_workspace")
+        fields = ("id", "email", "username", "avatar")
         read_only_fields = ("email",)
         only_on_update_fields = ("username",)
         extra_kwargs = {
@@ -22,17 +22,6 @@ class UserSerializer(serializers.ModelSerializer):
                 "required": False
             }
         }
-
-    current_workspace = serializers.SerializerMethodField()
-
-    def get_current_workspace(self, user: models.User):
-        from docgi.workspaces.serializers import WorkspaceSerializer
-
-        current_workspace = user.current_workspace
-        return WorkspaceSerializer(
-            instance=current_workspace,
-            context=self.context
-        ).data
 
     def validate_username(self, username):
         checker = models.User.objects.filter(

@@ -145,7 +145,7 @@ class SendInvitationSerializer(serializers.Serializer):
         for it in invitations:
             count = sum(it["email"] == _it["email"] for _it in invitations)
             if count > 1:
-                raise serializers.ValidationError({"invitations": ["Contains duplicate emails."]})
+                raise serializers.ValidationError({"invitations": "Duplicate emails."})
         return invitations
 
     def create(self, validated_data):
@@ -189,7 +189,10 @@ class SendInvitationSerializer(serializers.Serializer):
             self._send_invite(instances)
 
             result.update(
-                recently_invited=[it["email"] for it in invitations]
+                recently_invited=[{
+                    "email": it["email"],
+                    "workspace_role": it["workspace_role"]
+                } for it in invitations]
             )
         return result
 
