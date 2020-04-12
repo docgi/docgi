@@ -14,7 +14,7 @@ from . import models
 
 User = get_user_model()
 LEN_CODE = 6
-URL_FRONT_END_JOIN_INVITE = "join-invite"  # Frontend must to handle this route
+URL_FRONT_END_JOIN_INVITE = "join-invitations/{}/{}"  # Frontend must to handle this route
 
 
 class CheckWorkspaceSerializer(serializers.Serializer):
@@ -22,10 +22,6 @@ class CheckWorkspaceSerializer(serializers.Serializer):
 
 
 class GetCodeSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-
-
-class StatsWorkspaceSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
 
 
@@ -123,12 +119,10 @@ class SendInvitationSerializer(serializers.Serializer):
         child=InnerInvitationSerializer(), required=True, allow_empty=False, allow_null=False
     )
 
-    def _send_invite(self, instances):
+    def _send_invite(self, instances, workspace_name):
         for instance in instances:
             link_join = path.join(*[app_settings.FRONT_END_HOST_NAME,
-                                    instance.workspace.name,
-                                    URL_FRONT_END_JOIN_INVITE,
-                                    str(instance.uuid)])
+                                    URL_FRONT_END_JOIN_INVITE.format(workspace_name, instance.uuid)])
             ctx = dict(
                 inviter=instance.inviter.username,
                 link_join=link_join,
@@ -186,7 +180,8 @@ class SendInvitationSerializer(serializers.Serializer):
                 inviter=inviter
             ) for it in invitations]
             instances = models.Invitation.objects.bulk_create(invitation_objs)
-            self._send_invite(instances)
+            self._send_invite(instances=instances,
+                              workspace_name=workspace)
 
             result.update(
                 recently_invited=[{

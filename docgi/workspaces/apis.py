@@ -62,13 +62,13 @@ class StatsWorkspaceAPI(APIView):
             context=context
         ).data
         workspace = serializers.WorkspaceSerializer(
-            instance=user.current_workspace
+            instance=user.current_workspace,
+            context=context
         ).data
-        app_config_data = utils.get_app_config()
+
         data = dict(
             user=user_data,
-            workspace=workspace,
-            config=app_config_data
+            workspace=workspace
         )
 
         return Response(data=data)

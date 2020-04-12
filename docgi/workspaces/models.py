@@ -41,7 +41,7 @@ class Workspace(SoftDeletableModel, TimeStampedModel):
                                    height=settings.WORKSPACE_LOGO_THUMBNAIL_HEIGHT
                                )],
                                format="JPEG",
-                               options={"quality": 100},
+                               options={"quality": 90},
                                blank=True)
 
     creator = models.ForeignKey(User, on_delete=models.PROTECT, related_name="own_workspaces")
