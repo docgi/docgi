@@ -30,6 +30,7 @@ class DocgiTokenObtainPairSerializer(TokenObtainSerializer):
     def validate(self, attrs):
         workspace = attrs.pop("workspace")
         data = super().validate(attrs)
+
         try:
             workspace_member = WorkspaceMember.objects.get(
                 user_id=self.user.id,

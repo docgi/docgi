@@ -221,7 +221,7 @@ class JoinInvitationSerializer(serializers.Serializer):
         role = invitation.workspace_role
 
         user = User.get_or_create(email=email)
-        models.WorkspaceMember.objects.create(
+        member = models.WorkspaceMember.objects.create(
             user=user, workspace_id=workspace_id, role=role
         )
         invitation.activate = False
@@ -229,16 +229,25 @@ class JoinInvitationSerializer(serializers.Serializer):
 
         return dict(
             user=user,
+            member=member,
             workspace=workspace
         )
 
     def to_representation(self, data):
+        from docgi.auth.serializers import KEY_WORKSPACE_ROLE_OBTAIN_TOKEN, KEY_WORKSPACE_NAME_OBTAIN_TOKEN
+
         user = data.get("user")
         workspace = data.get("workspace")
+        member = data.get("member")
         ret = dict(
             token=str(DocgiTokenObtainPairSerializer.get_token(
-                user=user, workspace=workspace.name
+                user=user,
+                workspace=workspace.name,
+                **{
+                    KEY_WORKSPACE_NAME_OBTAIN_TOKEN: member.workspace_id,
+                    KEY_WORKSPACE_ROLE_OBTAIN_TOKEN: member.role
+                },
             ).access_token),
-            need_pass=user.has_usable_password()
+            need_pass=not user.has_usable_password()
         )
         return ret
