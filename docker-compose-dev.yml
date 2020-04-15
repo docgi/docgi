@@ -6,11 +6,12 @@ volumes:
 
 services:
   redis:
-    image: bitnami/redis:latest
+    image: redis:3.2
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
     ports:
       - 6379:6379
     volumes:
-      - redis_data:/bitnami/redis/data
+      - redis_data:/data
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
 
