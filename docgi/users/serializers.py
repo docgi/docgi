@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_username(self, username):
         checker = models.User.objects.filter(
             username__iexact=username
-        ).exclude(id=self.context["view"].kwargs.get("pk"))
+        ).exclude(pk=self.context["request"].user.pk)
         if checker.exists():
             raise serializers.ValidationError(f"{username} already used")
         return username
