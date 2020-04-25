@@ -21,7 +21,6 @@ class Collection(TimeStampedModel):
                                 on_delete=models.SET_NULL,
                                 null=True,
                                 related_name="owner_collections")
-    members = models.ManyToManyField(User)
     workspace = models.ForeignKey("workspaces.Workspace",
                                   on_delete=models.CASCADE,
                                   related_name="collections")

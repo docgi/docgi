@@ -38,7 +38,7 @@ class User(AbstractUser):
                                  options={"quality": 90},
                                  blank=True)
 
-    def get_current_workspace_name(self):
+    def get_current_workspace_id(self):
         from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
         workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
         if not workspace_name:
@@ -57,7 +57,7 @@ class User(AbstractUser):
         from docgi.workspaces.models import Workspace
 
         workspace = Workspace.objects.get(
-            name=self.get_current_workspace_name()
+            name=self.get_current_workspace_id()
         )
         return workspace
 
@@ -67,7 +67,7 @@ class User(AbstractUser):
 
         member = WorkspaceMember.objects.get(
             user=self,
-            workspace=self.get_current_workspace_name()
+            workspace=self.get_current_workspace_id()
         )
         return member
 

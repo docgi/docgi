@@ -18,12 +18,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         current_user = self.request.user
-        workspace_id = current_user.get_current_workspace_name()
-
-        private_coll_qs = models.Collection.members.through.objects.filter(
-            user=self.request.user,
-            collection__workspace__exact=workspace_id,
-        ).values_list("collection", flat=True)
+        workspace_id = current_user.get_current_workspace_id()
 
         if self.action == "list":
             self.queryset = self.queryset.filter(
@@ -69,11 +64,11 @@ class CollectionViewSet(viewsets.ModelViewSet):
             )
 
         return self.queryset.filter(
-            Q(workspace_id=self.request.user.get_current_workspace_name()) &
+            Q(workspace_id=self.request.user.get_current_workspace_id()) &
             Q(
                 Q(private=False) |
                 Q(
-                    Q(private=True) & Q(id__in=Subquery(private_coll_qs))
+                    Q(private=True) & Q(creator=self.request.user)
                 )
             )
         )
@@ -98,7 +93,7 @@ class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
             )
         )
         return self.queryset.filter(
-            Q(collection__workspace=self.request.user.get_current_workspace_name()) &
+            Q(collection__workspace=self.request.user.get_current_workspace_id()) &
             Q(
                 Q(collection__private=False) |
                 Q(collection__private=True, collection__creator=self.request.user)

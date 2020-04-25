@@ -144,7 +144,7 @@ class SendInvitationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         inviter = self.context["request"].user
-        workspace = self.context["request"].user.get_current_workspace_name()
+        workspace = self.context["request"].user.get_current_workspace_id()
         invitations = validated_data.pop("invitations")
         result = dict()
 

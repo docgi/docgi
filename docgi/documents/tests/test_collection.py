@@ -93,20 +93,15 @@ class TestCollection(DocgiTestCase):
         self._new_collection(
             name="Collection 2",
             private=True,
-            members=[self.member1.pk, self.member2.pk]
         )
 
         self.make_login(self.creator)
         res = self.get(url_list_create_collection())
         self.assertEqual(len(res.data), 2)
 
-        self.make_login(self.member1)
-        res = self.get(url_list_create_collection())
-        self.assertEqual(len(res.data), 2)
-
         self.make_login(self.member2)
         res = self.get(url_list_create_collection())
-        self.assertEqual(len(res.data), 2)
+        self.assertEqual(len(res.data), 1)
 
         self.make_login(self.member3)
         res = self.get(url_list_create_collection())
