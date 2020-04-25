@@ -107,6 +107,21 @@ class TestCollection(DocgiTestCase):
         res = self.get(url_list_create_collection())
         self.assertEqual(len(res.data), 1)
 
+    def test_create_with_parent_none(self):
+        self._new_collection(
+            name="Collection 2",
+            private=True,
+            parent=None
+        )
+
+    def test_create_with_invalid_id_parent(self):
+        self._new_collection(
+            name="Collection 2",
+            private=True,
+            parent=-1,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
 
 class TestDocument(DocgiTestCase):
     def setUp(self) -> None:

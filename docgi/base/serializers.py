@@ -18,4 +18,4 @@ class ColorField(Field):
         return data
 
     def to_representation(self, value):
-        return f"#{value}"
+        return value

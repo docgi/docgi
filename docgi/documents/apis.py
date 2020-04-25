@@ -59,7 +59,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
             ).values_list("docs", flat=True)
 
             self.queryset = self.queryset.annotate(
-                child_cols=Subquery(child_collection_qs, output_field=JSONField()),
+                cols=Subquery(child_collection_qs, output_field=JSONField()),
                 docs=Subquery(doc_qs, output_field=JSONField())
             )
 

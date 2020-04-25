@@ -10,6 +10,7 @@ User = get_user_model()
 class Collection(TimeStampedModel):
     name = models.CharField(max_length=150)
     private = models.BooleanField(default=False)
+    emoji = models.CharField(max_length=10, blank=True)
     color = ColorField()
     parent = models.ForeignKey("self",
                                on_delete=models.CASCADE,
@@ -29,9 +30,7 @@ class Collection(TimeStampedModel):
         return self.name
 
     class Meta:
-        unique_together = (
-            ("workspace", "name"),
-        )
+        pass
 
 
 class Document(TimeStampedModel):

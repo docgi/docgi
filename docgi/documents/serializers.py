@@ -13,8 +13,8 @@ class CollectionSerializer(ExtraReadOnlyField,
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "workspace", "creator",
-            "private", "parent", "color", "child_cols", "docs"
+            "id", "name", "workspace", "creator", "emoji",
+            "private", "parent", "color", "cols", "docs"
         )
         read_only_fields = ("workspace", "creator")
         extra_kwargs = {
@@ -25,23 +25,33 @@ class CollectionSerializer(ExtraReadOnlyField,
 
     color = ColorField()
     docs = serializers.JSONField(read_only=True, default=list)
-    child_cols = serializers.JSONField(read_only=True, default=list)
+    cols = serializers.JSONField(read_only=True, default=list)
 
     def validate_name(self, name):
         view = self.context["view"]
         request = self.context["request"]
+
+        parent_id = self.initial_data.get("parent", None)
+        if self.context["view"].action in ("update", "partial_update"):
+            parent_id = parent_id or self.instance.parent_id
+
         checker = models.Collection.objects.filter(
-            name__iexact=name, workspace_id=request.user.get_current_workspace_id()
+            name__iexact=name,
+            workspace_id=request.user.get_current_workspace_id(),
+            parent_id=parent_id
         )
         if view.action in UPDATE_ACTIONS:
             checker = checker.exclude(id=view.kwargs.get("pk"))
 
         if checker.exists():
-            raise serializers.ValidationError("That name already used.")
+            raise serializers.ValidationError("That name already taken.")
 
         return name
 
     def validate_parent(self, parent: models.Collection):
+        if parent is None:
+            return None
+
         request = self.context["request"]
         view = self.context["view"]
         current_workspace = request.user.get_current_workspace_id()
