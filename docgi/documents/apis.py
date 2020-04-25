@@ -74,7 +74,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
         )
 
 
-class DocumentViewSet(DocgiFlexSerializerViewSetMixin, viewsets.ModelViewSet):
+class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DocumentSerializer
     queryset = models.Document.objects.select_related(
         "creator"

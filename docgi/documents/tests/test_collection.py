@@ -148,4 +148,3 @@ class TestDocument(DocgiTestCase):
 
     def test_create_doc(self):
         self._new_doc(collection_id=self.collection.id)
-    

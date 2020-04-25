@@ -1,14 +1,14 @@
 from django.contrib.auth import get_user_model
-from dumas.serializers import FlexToPresentMixin, ExtraReadOnlyField
 from rest_framework import serializers
 
-from docgi.base.serializers import UPDATE_ACTIONS, ColorField
+from docgi.base.serializer_fields import UPDATE_ACTIONS, ColorField
 from . import models
+from ..base.serializers import DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
 
 User = get_user_model()
 
 
-class CollectionSerializer(ExtraReadOnlyField,
+class CollectionSerializer(DocgiSerializerUtilMixin,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
@@ -75,8 +75,8 @@ class CollectionSerializer(ExtraReadOnlyField,
         return super().create(validated_data=validated_data)
 
 
-class DocumentSerializer(FlexToPresentMixin,
-                         ExtraReadOnlyField,
+class DocumentSerializer(DocgiFlexToPresentMixin,
+                         DocgiExtraReadOnlyField,
                          serializers.ModelSerializer):
     class Meta:
         model = models.Document
