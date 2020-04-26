@@ -14,7 +14,7 @@ class SimpleCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "creator", "emoji", "color", "is_collection"
+            "id", "name", "creator", "emoji", "color", "is_collection", "uuid"
         )
 
     is_collection = serializers.BooleanField(read_only=True, default=True)
@@ -24,7 +24,7 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc"
+            "id", "name", "is_doc", "uuid"
         )
 
     name = serializers.CharField(read_only=True, source="title")
@@ -38,11 +38,11 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
         model = models.Collection
         fields = (
             "id", "name", "workspace", "creator", "emoji", "parent",
-            "private", "parent", "color", "children", "is_collection"
+            "private", "parent", "color", "children", "is_collection", "uuid"
         )
         read_only_fields = ("workspace", "creator",)
 
-    color = ColorField()
+    color = ColorField(required=False, default="ffffff")
     children = serializers.SerializerMethodField()
     is_collection = serializers.BooleanField(read_only=True, default=True)
 
@@ -114,7 +114,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         model = models.Document
         fields = (
             "id", "title", "contents", "star", "contributors",
-            "creator", "collection", "is_docs"
+            "creator", "collection", "is_docs", "uuid"
         )
         read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)

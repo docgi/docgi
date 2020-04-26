@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from model_utils.models import TimeStampedModel
@@ -8,6 +10,8 @@ User = get_user_model()
 
 
 class Collection(TimeStampedModel):
+    uuid = models.UUIDField(editable=False, default=uuid.uuid4)
+
     name = models.CharField(max_length=150)
     private = models.BooleanField(default=False)
     emoji = models.CharField(max_length=10, blank=True)
@@ -34,6 +38,8 @@ class Collection(TimeStampedModel):
 
 
 class Document(TimeStampedModel):
+    uuid = models.UUIDField(editable=False, default=uuid.uuid4)
+
     title = models.TextField()
     contents = models.TextField(blank=True)
 
