@@ -2,30 +2,49 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from docgi.base.serializer_fields import UPDATE_ACTIONS, ColorField
+from docgi.base.serializers import (
+    DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
+)
 from . import models
-from ..base.serializers import DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
 
 User = get_user_model()
 
 
-class CollectionSerializer(DocgiSerializerUtilMixin,
+class SimpleCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Collection
+        fields = (
+            "id", "name", "creator", "emoji", "color", "is_collection"
+        )
+
+    is_collection = serializers.BooleanField(read_only=True, default=True)
+
+
+class SimpleDocsInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Document
+        fields = (
+            "id", "name", "is_doc"
+        )
+
+    name = serializers.CharField(read_only=True, source="title")
+    is_doc = serializers.BooleanField(read_only=True, default=True)
+
+
+class CollectionSerializer(DocgiFlexToPresentMixin,
+                           DocgiSerializerUtilMixin,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "workspace", "creator", "emoji",
-            "private", "parent", "color", "cols", "docs"
+            "id", "name", "workspace", "creator", "emoji", "parent",
+            "private", "parent", "color", "children", "is_collection"
         )
-        read_only_fields = ("workspace", "creator")
-        extra_kwargs = {
-            "parent": {
-                "write_only": True
-            }
-        }
+        read_only_fields = ("workspace", "creator",)
 
     color = ColorField()
-    docs = serializers.JSONField(read_only=True, default=list)
-    cols = serializers.JSONField(read_only=True, default=list)
+    children = serializers.SerializerMethodField()
+    is_collection = serializers.BooleanField(read_only=True, default=True)
 
     def validate_name(self, name):
         view = self.context["view"]
@@ -64,6 +83,19 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
 
         return parent
 
+    def get_children(self, obj):
+        child_cols = SimpleCollectionSerializer(
+            instance=obj.children.all(),
+            many=True,
+            context=self.context
+        ).data
+        child_docs = SimpleDocsInfoSerializer(
+            instance=obj.documents.all(),
+            many=True,
+            context=self.context
+        ).data
+        return child_docs + child_cols
+
     def create(self, validated_data: dict):
         user = self.context["request"].user
         workspace_id = self.context["request"].user.get_current_workspace_id()
@@ -80,7 +112,10 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
                          serializers.ModelSerializer):
     class Meta:
         model = models.Document
-        fields = ("id", "title", "contents", "star", "contributors", "creator", "collection")
+        fields = (
+            "id", "title", "contents", "star", "contributors",
+            "creator", "collection", "is_docs"
+        )
         read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)
         flex_represent_fields = {
@@ -91,6 +126,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         }
 
     star = serializers.IntegerField(read_only=True, default=0)
+    is_docs = serializers.BooleanField(read_only=True, default=True)
 
     def validate_collection(self, collection):
         current_workspace = self.context["request"].user.get_current_workspace_id()

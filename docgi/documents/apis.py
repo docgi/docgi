@@ -1,17 +1,17 @@
-from django.contrib.postgres.fields import JSONField
 from django.db.models import Subquery, IntegerField, OuterRef, Count, Value, Q
-from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce
 from rest_framework import viewsets
 
 from docgi.documents import filters, permissions
-from docgi.base.apis import DocgiFlexSerializerViewSetMixin
 from . import serializers, models
 
 
 class CollectionViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CollectionSerializer
-    queryset = models.Collection.objects.all()
+    queryset = models.Collection.objects.prefetch_related(
+        "children",
+        "documents"
+    ).all()
     permission_classes = [
         permissions.CollectionPermission
     ]
@@ -25,52 +25,9 @@ class CollectionViewSet(viewsets.ModelViewSet):
                 parent__isnull=True
             )
 
-        if self.action == "retrieve":
-            child_collection_qs = models.Collection.objects.filter(
-                parent=OuterRef("pk"), workspace_id__exact=workspace_id
-            ).annotate(
-                cols=RawSQL(
-                    """
-                    coalesce(
-                        json_agg(
-                            json_build_object(
-                                'id', id,
-                                'name', name,
-                                'color', concat('#', color)
-                            )
-                        ),
-                        '[]'::json
-                    )
-                    """, ()
-                )
-            ).values_list("cols", flat=True)
-
-            doc_qs = models.Document.objects.filter(
-                collection=OuterRef("pk")
-            ).annotate(
-                docs=RawSQL(
-                    """
-                    coalesce(
-                        json_agg(json_build_object('id', id, 'title', title)),
-                        '[]'::json
-                    )
-                    """, ()
-                )
-            ).values_list("docs", flat=True)
-
-            self.queryset = self.queryset.annotate(
-                cols=Subquery(child_collection_qs, output_field=JSONField()),
-                docs=Subquery(doc_qs, output_field=JSONField())
-            )
-
         return self.queryset.filter(
-            Q(workspace_id=self.request.user.get_current_workspace_id()) &
-            Q(
-                Q(private=False) |
-                Q(
-                    Q(private=True) & Q(creator=self.request.user)
-                )
-            )
+            workspace_id=workspace_id,
+            private=False
         )
 
 
