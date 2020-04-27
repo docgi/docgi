@@ -1,0 +1,18 @@
+from django.contrib import admin
+
+from . import models
+
+
+@admin.register(models.Collection)
+class CollectionAdmin(admin.ModelAdmin):
+    list_display = (
+        "name", "workspace", "creator",
+    )
+
+
+@admin.register(models.Document)
+class DocumentAdmin(admin.ModelAdmin):
+    list_display = (
+        "title", "collection", "creator",
+    )
+

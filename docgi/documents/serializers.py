@@ -14,10 +14,15 @@ class SimpleCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "creator", "emoji", "color", "is_collection", "uuid"
+            "id", "name", "creator", "emoji", "color", "is_collection", "uuid", "children"
         )
 
     is_collection = serializers.BooleanField(read_only=True, default=True)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance=instance)
+        ret["children"] = []
+        return ret
 
 
 class SimpleDocsInfoSerializer(serializers.ModelSerializer):
