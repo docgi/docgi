@@ -114,14 +114,6 @@ class TestCollection(DocgiTestCase):
             parent=None
         )
 
-    def test_create_with_invalid_id_parent(self):
-        self._new_collection(
-            name="Collection 2",
-            private=True,
-            parent=-1,
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
-
 
 class TestDocument(DocgiTestCase):
     def setUp(self) -> None:
@@ -140,7 +132,7 @@ class TestDocument(DocgiTestCase):
     def _new_doc(self, collection_id=None, title="Doc", **kwargs):
         status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
         payload = {
-            "collection": collection_id,
+            "collection": str(collection_id),
             "title": title,
             **kwargs
         }

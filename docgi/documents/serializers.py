@@ -14,22 +14,17 @@ class SimpleCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "creator", "emoji", "color", "is_collection", "uuid", "children"
+            "id", "name", "creator", "emoji", "color", "is_collection",
         )
 
     is_collection = serializers.BooleanField(read_only=True, default=True)
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance=instance)
-        ret["children"] = []
-        return ret
 
 
 class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc", "uuid"
+            "id", "name", "is_doc"
         )
 
     name = serializers.CharField(read_only=True, source="title")
@@ -42,12 +37,12 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "workspace", "creator", "emoji", "parent",
-            "private", "parent", "color", "children", "is_collection", "uuid"
+            "id", "name", "workspace", "creator", "emoji",
+            "private", "color", "children", "is_collection",
         )
         read_only_fields = ("workspace", "creator",)
 
-    color = ColorField(required=False, default="ffffff")
+    color = ColorField(required=False, default="f5f5f5")
     children = serializers.SerializerMethodField()
     is_collection = serializers.BooleanField(read_only=True, default=True)
 
@@ -55,14 +50,9 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
         view = self.context["view"]
         request = self.context["request"]
 
-        parent_id = self.initial_data.get("parent", None)
-        if self.context["view"].action in ("update", "partial_update"):
-            parent_id = parent_id or self.instance.parent_id
-
         checker = models.Collection.objects.filter(
             name__iexact=name,
             workspace_id=request.user.get_current_workspace_id(),
-            parent_id=parent_id
         )
         if view.action in UPDATE_ACTIONS:
             checker = checker.exclude(id=view.kwargs.get("pk"))
@@ -89,17 +79,12 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
         return parent
 
     def get_children(self, obj):
-        child_cols = SimpleCollectionSerializer(
-            instance=obj.children.all(),
-            many=True,
-            context=self.context
-        ).data
         child_docs = SimpleDocsInfoSerializer(
             instance=obj.documents.all(),
             many=True,
             context=self.context
         ).data
-        return child_docs + child_cols
+        return child_docs
 
     def create(self, validated_data: dict):
         user = self.context["request"].user
@@ -118,8 +103,8 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
     class Meta:
         model = models.Document
         fields = (
-            "id", "title", "contents", "star", "contributors",
-            "creator", "collection", "is_docs", "uuid"
+            "id", "title", "html_content", "json_content", "star",
+            "contributors", "creator", "collection", "is_docs"
         )
         read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)

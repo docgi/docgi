@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from model_utils.models import TimeStampedModel
 
@@ -10,17 +11,12 @@ User = get_user_model()
 
 
 class Collection(TimeStampedModel):
-    uuid = models.UUIDField(editable=False, default=uuid.uuid4)
+    id = models.UUIDField(editable=False, default=uuid.uuid4, primary_key=True)
 
     name = models.CharField(max_length=150)
     private = models.BooleanField(default=False)
     emoji = models.CharField(max_length=10, blank=True)
     color = ColorField()
-    parent = models.ForeignKey("self",
-                               on_delete=models.CASCADE,
-                               related_name="children",
-                               null=True,
-                               default=None)
 
     creator = models.ForeignKey(User,
                                 on_delete=models.SET_NULL,
@@ -38,10 +34,11 @@ class Collection(TimeStampedModel):
 
 
 class Document(TimeStampedModel):
-    uuid = models.UUIDField(editable=False, default=uuid.uuid4)
+    id = models.UUIDField(editable=False, default=uuid.uuid4, primary_key=True)
 
     title = models.TextField()
-    contents = models.TextField(blank=True)
+    html_content = models.TextField(blank=True)
+    json_content = JSONField(default=list, null=True, blank=True)
 
     archive = models.BooleanField(default=False)
     draft = models.BooleanField(default=True)
@@ -61,20 +58,3 @@ class Document(TimeStampedModel):
 
     def __str__(self):
         return self.title
-
-
-class UserStarDoc(models.Model):
-    user = models.ForeignKey(User,
-                             on_delete=models.CASCADE,
-                             related_name="stared_docs")
-    doc = models.ForeignKey(Document,
-                            on_delete=models.CASCADE,
-                            related_name="star_users")
-
-    def __str__(self):
-        return f"User @{self.user_id} stared on Docs @{self.doc_id}"
-
-    class Meta:
-        unique_together = (
-            ("user", "doc")
-        )
