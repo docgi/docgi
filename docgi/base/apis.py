@@ -1,3 +1,6 @@
+REGEX_UUID = r"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+
+
 class DocgiFlexSerializerViewSetMixin(object):
     """
     Get suitable for class base on view action.

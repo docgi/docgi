@@ -1,9 +1,11 @@
-from django.db.models import Subquery, IntegerField, OuterRef, Count, Value, Q
-from django.db.models.functions import Coalesce
+from uuid import UUID
+
+from django.db.models import Q
 from rest_framework import viewsets
 
 from docgi.documents import filters, permissions
 from . import serializers, models
+from ..base.apis import REGEX_UUID
 
 
 class CollectionViewSet(viewsets.ModelViewSet):
@@ -14,6 +16,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
     permission_classes = [
         permissions.CollectionPermission
     ]
+    lookup_value_regex = REGEX_UUID
 
     def get_queryset(self):
         current_user = self.request.user
@@ -39,6 +42,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
         "contributors"
     ).all()
     filterset_class = filters.DocumentFilter
+    lookup_value_regex = REGEX_UUID
 
     def get_queryset(self):
         return self.queryset.filter(
