@@ -13,6 +13,6 @@ class CollectionAdmin(admin.ModelAdmin):
 @admin.register(models.Document)
 class DocumentAdmin(admin.ModelAdmin):
     list_display = (
-        "title", "collection", "creator",
+        "name", "collection", "creator",
     )
 

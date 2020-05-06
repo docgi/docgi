@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from docgi.base.serializer_fields import UPDATE_ACTIONS, ColorField
+from docgi.base.serializer_fields import ColorField
 from docgi.base.serializers import (
     DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
 )
@@ -27,12 +27,10 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
             "id", "name", "is_doc"
         )
 
-    name = serializers.CharField(read_only=True, source="title")
     is_doc = serializers.BooleanField(read_only=True, default=True)
 
 
-class CollectionSerializer(DocgiFlexToPresentMixin,
-                           DocgiSerializerUtilMixin,
+class CollectionSerializer(DocgiSerializerUtilMixin,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
@@ -48,35 +46,17 @@ class CollectionSerializer(DocgiFlexToPresentMixin,
 
     def validate_name(self, name):
         view = self.context["view"]
-        request = self.context["request"]
-
         checker = models.Collection.objects.filter(
             name__iexact=name,
-            workspace_id=request.user.get_current_workspace_id(),
+            workspace_id=self.cur_user.get_current_workspace_id(),
         )
-        if view.action in UPDATE_ACTIONS:
+        if self.is_update_action():
             checker = checker.exclude(id=view.kwargs.get("pk"))
 
         if checker.exists():
             raise serializers.ValidationError("That name already taken.")
 
         return name
-
-    def validate_parent(self, parent: models.Collection):
-        if parent is None:
-            return None
-
-        request = self.context["request"]
-        view = self.context["view"]
-        current_workspace = request.user.get_current_workspace_id()
-        if parent.workspace_id != current_workspace:
-            raise serializers.ValidationError("Invalid parent")
-
-        if request.method in ["PUT", "PATCH"]:
-            if parent.id == view.kwargs.get("pk"):
-                raise serializers.ValidationError("Invalid parent")
-
-        return parent
 
     def get_children(self, obj):
         child_docs = SimpleDocsInfoSerializer(
@@ -103,7 +83,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
     class Meta:
         model = models.Document
         fields = (
-            "id", "title", "html_content", "json_content", "star",
+            "id", "name", "html_content", "json_content", "star",
             "contributors", "creator", "collection", "is_docs"
         )
         read_only_fields = ("contributors", "creator")

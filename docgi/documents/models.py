@@ -36,7 +36,7 @@ class Collection(TimeStampedModel):
 class Document(TimeStampedModel):
     id = models.UUIDField(editable=False, default=uuid.uuid4, primary_key=True)
 
-    title = models.TextField()
+    name = models.CharField(max_length=512)
     html_content = models.TextField(blank=True)
     json_content = JSONField(default=list, null=True, blank=True)
 

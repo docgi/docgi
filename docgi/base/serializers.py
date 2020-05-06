@@ -29,6 +29,10 @@ class DocgiSerializerUtilMixin(object):
         method = self.context["request"].method
         return method == POST
 
+    @property
+    def cur_user(self):
+        return self.context["request"].user
+
 
 def is_subclass(cls, baseclass):
     if isclass(cls):

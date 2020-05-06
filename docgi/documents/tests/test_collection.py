@@ -133,7 +133,7 @@ class TestDocument(DocgiTestCase):
         status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
         payload = {
             "collection": str(collection_id),
-            "title": title,
+            "name": title,
             **kwargs
         }
         return self.post(url_list_and_create_document(), data=payload, status_code=status_code)
