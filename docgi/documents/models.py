@@ -57,4 +57,4 @@ class Document(TimeStampedModel):
         ordering = ("created",)
 
     def __str__(self):
-        return self.title
+        return self.name

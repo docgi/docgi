@@ -1,7 +1,7 @@
 packaging
 Pillow
-Django==3.0.3
-psycopg2==2.8.3
+Django==3.0.6
+psycopg2==2.8.5
 pytz==2019.2
 django-environ
 djangorestframework==3.11.0
@@ -14,4 +14,4 @@ uuid
 django_filter
 django-cors-headers
 drf-dumas==0.0.1
-django-extensions==2.2.5
+django-extensions==2.2.9

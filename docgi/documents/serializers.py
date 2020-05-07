@@ -78,6 +78,7 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
 
 
 class DocumentSerializer(DocgiFlexToPresentMixin,
+                         DocgiSerializerUtilMixin,
                          DocgiExtraReadOnlyField,
                          serializers.ModelSerializer):
     class Meta:
@@ -121,3 +122,12 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
             instance.contributors.add(current_user)
 
         return instance
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+
+        if self.is_post_method():
+            ret.pop("html_content")
+            ret.pop("json_content")
+
+        return ret

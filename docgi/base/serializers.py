@@ -96,7 +96,7 @@ class DocgiFlexToPresentMixin(object):
     def flex_represent_fields(self) -> dict:
         if hasattr(self, "Meta") and hasattr(self.Meta, "flex_represent_fields"):
             assert isinstance(self.Meta.flex_represent_fields, dict), (
-                "`flex_represent_fields` "
+                "`flex_represent_fields` must be dict"
             )
             return self.Meta.flex_represent_fields
         return {}
