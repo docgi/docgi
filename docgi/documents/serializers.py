@@ -6,6 +6,7 @@ from docgi.base.serializers import (
     DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
 )
 from . import models
+from ..users.serializers import UserInfoSerializer
 
 User = get_user_model()
 
@@ -24,9 +25,9 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc"
+            "id", "name", "is_doc", "created", "creator", "modified"
         )
-
+    creator = UserInfoSerializer(read_only=True)
     is_doc = serializers.BooleanField(read_only=True, default=True)
 
 
@@ -85,7 +86,8 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         model = models.Document
         fields = (
             "id", "name", "html_content", "json_content", "star",
-            "contributors", "creator", "collection", "is_docs"
+            "contributors", "creator", "collection", "is_docs",
+            "created", "modified"
         )
         read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)
@@ -93,11 +95,12 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
             "contributors": {
                 "presenter": "docgi.users.serializers.UserInfoSerializer",
                 "many": True
-            }
+            },
         }
 
     star = serializers.IntegerField(read_only=True, default=0)
     is_docs = serializers.BooleanField(read_only=True, default=True)
+    creator = UserInfoSerializer(read_only=True)
 
     def validate_collection(self, collection):
         current_workspace = self.context["request"].user.get_current_workspace_id()

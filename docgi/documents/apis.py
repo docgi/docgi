@@ -1,6 +1,4 @@
-from uuid import UUID
-
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from rest_framework import viewsets
 
 from docgi.documents import filters, permissions
@@ -10,9 +8,7 @@ from ..base.apis import REGEX_UUID
 
 class CollectionViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CollectionSerializer
-    queryset = models.Collection.objects.prefetch_related(
-        "documents"
-    ).all()
+    queryset = models.Collection.objects.all()
     permission_classes = [
         permissions.CollectionPermission
     ]
@@ -30,6 +26,13 @@ class CollectionViewSet(viewsets.ModelViewSet):
             ) |
             Q(
                 private=True, creator=self.request.user
+            )
+        ).prefetch_related(
+            Prefetch(
+                "documents",
+                queryset=models.Document.objects.select_related(
+                    "creator"
+                )
             )
         )
 
