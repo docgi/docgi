@@ -30,7 +30,7 @@ class Collection(TimeStampedModel):
         return self.name
 
     class Meta:
-        pass
+        ordering = ("name",)
 
 
 class Document(TimeStampedModel):

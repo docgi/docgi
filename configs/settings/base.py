@@ -46,9 +46,10 @@ THIRD_PARTY_APPS = [
     'corsheaders',
 ]
 LOCAL_APPS = [
-    'docgi.users',
-    'docgi.workspaces',
-    'docgi.documents',
+    'docgi.users.apps.UsersConfig',
+    'docgi.workspaces.apps.WorkspacesConfig',
+    'docgi.documents.apps.DocumentsConfig',
+    'docgi.activities.apps.ActivitiesConfig',
 ]
 DJANGO_APPS = [
     'django.contrib.admin',
