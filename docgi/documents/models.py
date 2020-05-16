@@ -41,7 +41,7 @@ class Document(TimeStampedModel):
     json_content = JSONField(default=list, null=True, blank=True)
 
     archive = models.BooleanField(default=False)
-    draft = models.BooleanField(default=True)
+    draft = models.BooleanField(default=False)
 
     collection = models.ForeignKey(Collection,
                                    on_delete=models.CASCADE,

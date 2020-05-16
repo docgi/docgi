@@ -25,7 +25,7 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc", "created", "creator", "modified"
+            "id", "name", "is_doc", "created", "creator", "modified", "draft"
         )
     creator = UserInfoSerializer(read_only=True)
     is_doc = serializers.BooleanField(read_only=True, default=True)
@@ -87,7 +87,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         fields = (
             "id", "name", "html_content", "json_content", "star",
             "contributors", "creator", "collection", "is_docs",
-            "created", "modified"
+            "created", "modified", "draft"
         )
         read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)
