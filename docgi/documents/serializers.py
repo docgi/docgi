@@ -25,7 +25,7 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc", "created", "creator", "modified", "draft"
+            "id", "name", "is_doc", "created", "creator", "modified", "draft", "collection"
         )
     creator = UserInfoSerializer(read_only=True)
     is_doc = serializers.BooleanField(read_only=True, default=True)
