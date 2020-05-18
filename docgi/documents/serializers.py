@@ -134,3 +134,25 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
             ret.pop("json_content")
 
         return ret
+
+
+class DocumentImageSerializer(DocgiFlexToPresentMixin,
+                              DocgiSerializerUtilMixin,
+                              serializers.ModelSerializer):
+    class Meta:
+        model = models.DocumentImage
+        fields = (
+            "image",
+        )
+
+    def create(self, validated_data):
+        validated_data.update(
+            workspace_id=self.cur_user.get_current_workspace_id()
+        )
+        return super().create(validated_data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        url = ret.pop("image")
+        ret["src"] = url
+        return ret

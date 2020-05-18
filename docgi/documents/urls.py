@@ -18,5 +18,11 @@ router.register(
     basename="documents"
 )
 
+router.register(
+    r"document-images",
+    apis.DocumentImageViewSet,
+    basename="document-images"
+)
+
 urlpatterns = []
 urlpatterns += router.urls

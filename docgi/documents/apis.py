@@ -1,5 +1,7 @@
 from django.db.models import Q, Prefetch
 from rest_framework import viewsets
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.parsers import MultiPartParser
 
 from docgi.documents import filters, permissions
 from . import serializers, models
@@ -55,3 +57,11 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 Q(collection__private=True, collection__creator=self.request.user)
             )
         )
+
+
+class DocumentImageViewSet(CreateModelMixin,
+                           viewsets.GenericViewSet):
+    parser_classes = [
+        MultiPartParser
+    ]
+    serializer_class = serializers.DocumentImageSerializer

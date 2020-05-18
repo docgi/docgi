@@ -8,4 +8,7 @@ class CollectionPermission(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj: models.Collection):
-        return obj.creator_id == request.user.id
+        if request.method == "DELETE":
+            return obj.creator_id == request.user.id
+
+        return request.user.is_authenticated
