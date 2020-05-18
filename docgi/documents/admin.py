@@ -16,3 +16,9 @@ class DocumentAdmin(admin.ModelAdmin):
         "name", "collection", "creator",
     )
 
+
+@admin.register(models.DocumentImage)
+class DocumentImageAdmin(admin.ModelAdmin):
+    list_display = (
+        "workspace", "image"
+    )

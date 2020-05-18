@@ -68,8 +68,7 @@ class DocumentImage(models.Model):
     def image_path(self, filename, *args, **kwargs):
         paths = [
             settings.DOCUMENT_IMAGE_DIR,
-            str(uuid.uuid4()),
-            path.basename(filename)
+            str(uuid.uuid4()) + path.basename(filename)
         ]
         return path.join(*paths)
 

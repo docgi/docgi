@@ -1,3 +1,4 @@
 -r base.txt
 
 uwsgi
+sentry-sdk==0.14.4
