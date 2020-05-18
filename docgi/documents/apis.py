@@ -1,6 +1,6 @@
 from django.db.models import Q, Prefetch
 from rest_framework import viewsets
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.parsers import MultiPartParser
 
 from docgi.documents import filters, permissions
@@ -42,7 +42,8 @@ class CollectionViewSet(viewsets.ModelViewSet):
 class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.DocumentSerializer
     queryset = models.Document.objects.select_related(
-        "creator"
+        "creator",
+        "last_update_by"
     ).prefetch_related(
         "contributors"
     ).all()
@@ -65,3 +66,30 @@ class DocumentImageViewSet(CreateModelMixin,
         MultiPartParser
     ]
     serializer_class = serializers.DocumentImageSerializer
+
+
+class RecentlyUpdateDocumentAPI(ListModelMixin,
+                                viewsets.GenericViewSet):
+    pagination_class = None
+    serializer_class = serializers.SimpleDocsInfoSerializer
+    queryset = models.Document.objects.select_related(
+        "creator",
+        "last_update_by"
+    ).prefetch_related(
+        "contributors"
+    ).all()
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            Q(collection__workspace=self.request.user.get_current_workspace_id()) &
+            Q(
+                Q(collection__private=False) |
+                Q(collection__private=True, collection__creator=self.request.user)
+            ) &
+            Q(
+                draft=False
+            )
+        ).order_by(
+            "-modified"
+        )[:10]
+

@@ -19,6 +19,12 @@ router.register(
 )
 
 router.register(
+    r"recently-update-docs",
+    apis.RecentlyUpdateDocumentAPI,
+    basename="recently_update_docs"
+)
+
+router.register(
     r"document-images",
     apis.DocumentImageViewSet,
     basename="document-images"

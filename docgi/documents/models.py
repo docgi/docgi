@@ -56,6 +56,10 @@ class Document(TimeStampedModel):
                                 related_name="owner_docs")
     contributors = models.ManyToManyField(User,
                                           related_name="contributed_docs")
+    last_update_by = models.ForeignKey(User,
+                                       on_delete=models.SET_NULL,
+                                       related_name="+",
+                                       null=True)
 
     class Meta:
         ordering = ("created",)

@@ -15,7 +15,7 @@ class SimpleCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "creator", "emoji", "color", "is_collection",
+            "id", "name", "creator", "emoji", "color", "is_collection"
         )
 
     is_collection = serializers.BooleanField(read_only=True, default=True)
@@ -25,9 +25,11 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc", "created", "creator", "modified", "draft", "collection"
+            "id", "name", "is_doc", "created", "creator",
+            "modified", "draft", "collection", "last_update_by"
         )
     creator = UserInfoSerializer(read_only=True)
+    last_update_by = UserInfoSerializer(read_only=True)
     is_doc = serializers.BooleanField(read_only=True, default=True)
 
 
@@ -87,7 +89,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         fields = (
             "id", "name", "html_content", "json_content", "star",
             "contributors", "creator", "collection", "is_docs",
-            "created", "modified", "draft"
+            "created", "modified", "draft", "last_update_by"
         )
         read_only_fields = ("contributors", "creator")
         create_only_fields = ("collection",)
@@ -101,6 +103,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
     star = serializers.IntegerField(read_only=True, default=0)
     is_docs = serializers.BooleanField(read_only=True, default=True)
     creator = UserInfoSerializer(read_only=True)
+    last_update_by = UserInfoSerializer(read_only=True)
 
     def validate_collection(self, collection):
         current_workspace = self.context["request"].user.get_current_workspace_id()
@@ -111,12 +114,17 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
     def create(self, validated_data):
         user = self.context["request"].user
         validated_data.update(
-            creator=user
+            creator=user,
+            last_update_by=user
         )
         return super().create(validated_data=validated_data)
 
     def update(self, instance, validated_data):
         current_user = self.context["request"].user
+        validated_data.update(
+            last_update_by=current_user
+        )
+
         contributors = instance.contributors.all()
         instance = super().update(instance, validated_data)
 
