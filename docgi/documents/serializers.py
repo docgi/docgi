@@ -105,6 +105,12 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
     creator = UserInfoSerializer(read_only=True)
     last_update_by = UserInfoSerializer(read_only=True)
 
+    def get_fields(self):
+        fields = super().get_fields()
+        if self.is_update_action():
+            setattr(fields["name"], "required", False)
+        return fields
+
     def validate_collection(self, collection):
         current_workspace = self.context["request"].user.get_current_workspace_id()
         if collection.workspace_id != current_workspace:
@@ -128,8 +134,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         contributors = instance.contributors.all()
         instance = super().update(instance, validated_data)
 
-        if current_user.id != instance.creator_id and \
-                current_user.id not in [user.id for user in contributors]:
+        if current_user.id not in [user.id for user in contributors]:
             instance.contributors.add(current_user)
 
         return instance
@@ -137,7 +142,8 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
     def to_representation(self, instance):
         ret = super().to_representation(instance)
 
-        if self.is_post_method():
+        # Ignore both fields on create action, because client already hold it
+        if self.is_create_action():
             ret.pop("html_content")
             ret.pop("json_content")
 
