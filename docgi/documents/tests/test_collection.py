@@ -1,22 +1,8 @@
-from django.urls import reverse
 from rest_framework import status
 
 from docgi.documents import models
 from docgi.base.tests import DocgiTestCase
-
-
-def url_list_create_collection():
-    return reverse("documents:collections-list")
-
-
-def url_collection_detail(collection_id):
-    return reverse("documents:collections-detail", kwargs={
-        "pk": collection_id
-    })
-
-
-def url_list_and_create_document():
-    return reverse("documents:documents-list")
+from .utils import *
 
 
 class TestCollection(DocgiTestCase):
@@ -113,30 +99,3 @@ class TestCollection(DocgiTestCase):
             private=True,
             parent=None
         )
-
-
-class TestDocument(DocgiTestCase):
-    def setUp(self) -> None:
-        super().setUp()
-        res = self._new_collection()
-        self.collection = models.Collection.objects.get(id=res.data["id"])
-
-    def _new_collection(self, name="Collection", **kwargs):
-        status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
-        payload = {
-            "name": name,
-            **kwargs
-        }
-        return self.post(url_list_create_collection(), data=payload, status_code=status_code)
-
-    def _new_doc(self, collection_id=None, title="Doc", **kwargs):
-        status_code = kwargs.pop("status_code", status.HTTP_201_CREATED)
-        payload = {
-            "collection": str(collection_id),
-            "name": title,
-            **kwargs
-        }
-        return self.post(url_list_and_create_document(), data=payload, status_code=status_code)
-
-    def test_create_doc(self):
-        self._new_doc(collection_id=self.collection.id)

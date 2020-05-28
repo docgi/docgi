@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from django.db import transaction
 
 from docgi.base.serializer_fields import ColorField
 from docgi.base.serializers import (
@@ -117,13 +118,17 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
             raise serializers.ValidationError()
         return collection
 
+    @transaction.atomic
     def create(self, validated_data):
         user = self.context["request"].user
         validated_data.update(
             creator=user,
             last_update_by=user
         )
-        return super().create(validated_data=validated_data)
+        instance = super().create(validated_data=validated_data)
+        instance.contributors.add(user)
+
+        return instance
 
     def update(self, instance, validated_data):
         current_user = self.context["request"].user

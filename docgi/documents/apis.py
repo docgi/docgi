@@ -33,7 +33,8 @@ class CollectionViewSet(viewsets.ModelViewSet):
             Prefetch(
                 "documents",
                 queryset=models.Document.objects.select_related(
-                    "creator"
+                    "creator",
+                    "last_update_by"
                 )
             )
         )
