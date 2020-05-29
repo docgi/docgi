@@ -92,10 +92,3 @@ class TestCollection(DocgiTestCase):
         self.make_login(self.member3)
         res = self.get(url_list_create_collection())
         self.assertEqual(len(res.data), 1)
-
-    def test_create_with_parent_none(self):
-        self._new_collection(
-            name="Collection 2",
-            private=True,
-            parent=None
-        )

@@ -56,19 +56,31 @@ class StatsWorkspaceAPI(APIView):
             view=self
         )
 
-        user = request.user
-        user_data = UserInfoSerializer(
-            instance=user,
+        current_user = request.user
+        user = UserInfoSerializer(
+            instance=current_user,
             context=context
         ).data
         workspace = serializers.WorkspaceSerializer(
-            instance=user.current_workspace,
+            instance=current_user.current_workspace,
             context=context
         ).data
 
+        workspace_members = models.WorkspaceMember.objects.filter(
+            workspace=current_user.current_workspace,
+        ).select_related(
+            "user"
+        )
+        members = serializers.WorkspaceMemberSerializer(
+            context=context,
+            many=True,
+            instance=workspace_members
+        ).data
+
         data = dict(
-            user=user_data,
-            workspace=workspace
+            user=user,
+            workspace=workspace,
+            members=members
         )
 
         return Response(data=data)
