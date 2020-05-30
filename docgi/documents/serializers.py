@@ -6,34 +6,22 @@ from docgi.base.serializer_fields import ColorField
 from docgi.base.serializers import (
     DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
 )
-from . import models
+from . import models, services
 from ..users.serializers import UserInfoSerializer
 
 User = get_user_model()
-
-
-class SimpleCollectionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Collection
-        fields = (
-            "id", "name", "creator", "emoji", "color",
-            "is_collection", "public", "public_by"
-        )
-
-    is_collection = serializers.BooleanField(read_only=True, default=True)
 
 
 class SimpleDocsInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Document
         fields = (
-            "id", "name", "is_doc", "created", "creator",
-            "modified", "draft", "collection", "last_update_by"
+            "id", "name", "created", "creator",
+            "modified", "draft", "collection", "last_update_by",
         )
 
     creator = UserInfoSerializer(read_only=True)
     last_update_by = UserInfoSerializer(read_only=True)
-    is_doc = serializers.BooleanField(read_only=True, default=True)
 
 
 class CollectionSerializer(DocgiSerializerUtilMixin,
@@ -44,7 +32,7 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
         fields = (
             "id", "name", "workspace", "creator", "emoji",
             "private", "color", "children", "is_collection",
-            "public", "public_by"
+            "public", "public_by", "public_link"
         )
         read_only_fields = ("workspace", "creator", "public_by")
         extra_kwargs = {
@@ -53,13 +41,17 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
             },
             "public_by": {
                 "required": False
+            },
+            "name": {
+                "required": False
             }
         }
         update_only_fields = ("public",)
 
     color = ColorField(required=False, default="f5f5f5")
     children = serializers.SerializerMethodField()
-    is_collection = serializers.BooleanField(read_only=True, default=True)
+    is_collection = serializers.SerializerMethodField()
+    public_link = serializers.SerializerMethodField()
 
     def validate_name(self, name):
         view = self.context["view"]
@@ -83,11 +75,21 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
         ).data
         return child_docs
 
+    def get_public_link(self, collection):
+        return services.build_public_collection_url(collection, self.get_request())
+
+    def get_is_collection(self, _):
+        return True
+
     def _validate_public(self, validated_data):
         public = validated_data.get("public", False)
         if public is True:
             validated_data.update(
                 public_by=self.cur_user
+            )
+        else:
+            validated_data.update(
+                public_by=None
             )
         return validated_data
 
@@ -105,7 +107,7 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
     def update(self, instance, validated_data):
         validated_data = self._validate_public(validated_data)
         return super().update(instance, validated_data)
-        
+
 
 class DocumentSerializer(DocgiFlexToPresentMixin,
                          DocgiSerializerUtilMixin,
@@ -115,7 +117,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         model = models.Document
         fields = (
             "id", "name", "html_content", "json_content", "star",
-            "contributors", "creator", "collection", "is_docs",
+            "contributors", "creator", "collection",
             "created", "modified", "draft", "last_update_by"
         )
         read_only_fields = ("contributors", "creator")
@@ -128,7 +130,6 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         }
 
     star = serializers.IntegerField(read_only=True, default=0)
-    is_docs = serializers.BooleanField(read_only=True, default=True)
     creator = UserInfoSerializer(read_only=True)
     last_update_by = UserInfoSerializer(read_only=True)
 

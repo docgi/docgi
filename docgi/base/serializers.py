@@ -29,6 +29,12 @@ class DocgiSerializerUtilMixin(object):
         method = self.context["request"].method
         return method == POST
 
+    def get_request(self):
+        return self.context["request"]
+
+    def get_view(self):
+        return self.context["view"]
+
     @property
     def cur_user(self):
         return self.context["request"].user
