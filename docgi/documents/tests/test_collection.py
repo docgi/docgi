@@ -92,3 +92,22 @@ class TestCollection(DocgiTestCase):
         self.make_login(self.member3)
         res = self.get(url_list_create_collection())
         self.assertEqual(len(res.data), 1)
+
+    def test_make_collection_public(self):
+        res = self._new_collection()
+        res = self._update_collection(collection_id=res.data["id"], public=True)
+        self.assertTrue(res.data["public"])
+        self.assertIsNotNone(res.data["public_by"])
+
+    def test_get_public_collection(self):
+        # This test case to ensure public collection can access with Anonymous user.
+        res = self._new_collection()
+        self._update_collection(collection_id=res.data["id"], public=True)
+
+        self.make_logout()
+        res = self.get(url_public_collection(collection_id=res.data["id"]))
+        self.assertTrue(res.data["public"])
+
+    def test_get_non_public_collection_with_anonymous_user(self):
+        res = self._new_collection()
+        self.get(url_public_collection(collection_id=res.data["id"]), status_code=status.HTTP_404_NOT_FOUND)

@@ -16,7 +16,8 @@ class SimpleCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
-            "id", "name", "creator", "emoji", "color", "is_collection"
+            "id", "name", "creator", "emoji", "color",
+            "is_collection", "public", "public_by"
         )
 
     is_collection = serializers.BooleanField(read_only=True, default=True)
@@ -29,20 +30,32 @@ class SimpleDocsInfoSerializer(serializers.ModelSerializer):
             "id", "name", "is_doc", "created", "creator",
             "modified", "draft", "collection", "last_update_by"
         )
+
     creator = UserInfoSerializer(read_only=True)
     last_update_by = UserInfoSerializer(read_only=True)
     is_doc = serializers.BooleanField(read_only=True, default=True)
 
 
 class CollectionSerializer(DocgiSerializerUtilMixin,
+                           DocgiExtraReadOnlyField,
                            serializers.ModelSerializer):
     class Meta:
         model = models.Collection
         fields = (
             "id", "name", "workspace", "creator", "emoji",
             "private", "color", "children", "is_collection",
+            "public", "public_by"
         )
-        read_only_fields = ("workspace", "creator",)
+        read_only_fields = ("workspace", "creator", "public_by")
+        extra_kwargs = {
+            "public": {
+                "required": False
+            },
+            "public_by": {
+                "required": False
+            }
+        }
+        update_only_fields = ("public",)
 
     color = ColorField(required=False, default="f5f5f5")
     children = serializers.SerializerMethodField()
@@ -70,16 +83,29 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
         ).data
         return child_docs
 
+    def _validate_public(self, validated_data):
+        public = validated_data.get("public", False)
+        if public is True:
+            validated_data.update(
+                public_by=self.cur_user
+            )
+        return validated_data
+
     def create(self, validated_data: dict):
         user = self.context["request"].user
         workspace_id = self.context["request"].user.get_current_workspace_id()
 
+        validated_data = self._validate_public(validated_data)
         validated_data.update(
             creator=user,
             workspace_id=workspace_id
         )
         return super().create(validated_data=validated_data)
 
+    def update(self, instance, validated_data):
+        validated_data = self._validate_public(validated_data)
+        return super().update(instance, validated_data)
+        
 
 class DocumentSerializer(DocgiFlexToPresentMixin,
                          DocgiSerializerUtilMixin,

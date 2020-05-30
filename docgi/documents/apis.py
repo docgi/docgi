@@ -1,7 +1,8 @@
 from django.db.models import Q, Prefetch
 from rest_framework import viewsets
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.parsers import MultiPartParser
+from rest_framework.permissions import AllowAny
 
 from docgi.documents import filters, permissions
 from . import serializers, models
@@ -94,3 +95,12 @@ class RecentlyUpdateDocumentAPI(ListModelMixin,
             "-modified"
         )[:10]
 
+
+class PublicCollectionAPI(RetrieveModelMixin,
+                          viewsets.GenericViewSet):
+    queryset = models.Collection.objects.filter(
+        public=True
+    )
+    serializer_class = serializers.CollectionSerializer
+    permission_classes = [AllowAny]
+    lookup_value_regex = REGEX_UUID

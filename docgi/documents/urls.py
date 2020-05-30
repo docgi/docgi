@@ -30,5 +30,11 @@ router.register(
     basename="document-images"
 )
 
+router.register(
+    r"public-collections",
+    apis.PublicCollectionAPI,
+    basename="public-collections"
+)
+
 urlpatterns = []
 urlpatterns += router.urls

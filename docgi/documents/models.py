@@ -22,6 +22,11 @@ class Collection(TimeStampedModel):
     emoji = models.CharField(max_length=10, blank=True)
     color = ColorField()
 
+    public = models.BooleanField(default=False)
+    public_by = models.ForeignKey(User,
+                                  on_delete=models.SET_NULL,
+                                  null=True)
+
     creator = models.ForeignKey(User,
                                 on_delete=models.SET_NULL,
                                 null=True,

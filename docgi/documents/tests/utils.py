@@ -11,6 +11,12 @@ def url_collection_detail(collection_id):
     })
 
 
+def url_public_collection(collection_id):
+    return reverse("documents:public-collections-detail", kwargs={
+        "pk": collection_id
+    })
+
+
 def url_list_and_create_document():
     return reverse("documents:documents-list")
 
