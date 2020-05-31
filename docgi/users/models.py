@@ -52,6 +52,10 @@ class User(AbstractUser):
             raise InvalidToken()
         return role
 
+    def is_workspace_admin(self):
+        from docgi.workspaces.models import WorkspaceMember
+        return self.get_current_workspace_role() == WorkspaceMember.WorkspaceMemberRole.ADMIN.value
+
     @cached_property
     def current_workspace(self):
         from docgi.workspaces.models import Workspace
