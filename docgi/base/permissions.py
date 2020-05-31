@@ -1,4 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework.request import Request
+
+User = get_user_model()
 
 POST = "POST"
 PUT = "PUT"
@@ -25,5 +28,5 @@ class DocgiPermissionHelper(object):
         return request.method == DELETE
 
     @staticmethod
-    def is_workspace_admin(request: Request) -> bool:
-        return request.user.is_workspace_admin()
+    def is_workspace_admin(user: User) -> bool:
+        return user.is_workspace_admin()

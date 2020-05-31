@@ -9,10 +9,10 @@ class CollectionPermission(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj: models.Collection):
-        if DocgiPermissionHelper.is_workspace_admin(request):
+        if DocgiPermissionHelper.is_workspace_admin(request.user):
             return True
 
-        if request.method == "DELETE":
+        if DocgiPermissionHelper.is_delete(request):
             return obj.creator_id == request.user.id
 
         return request.user.is_authenticated

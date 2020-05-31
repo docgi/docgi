@@ -6,6 +6,7 @@ from docgi.base.serializer_fields import ColorField
 from docgi.base.serializers import (
     DocgiSerializerUtilMixin, DocgiFlexToPresentMixin, DocgiExtraReadOnlyField
 )
+from docgi.workspaces.serializers import WorkspacePublicInfoSerializer
 from . import models, services
 from ..users.serializers import UserInfoSerializer
 
@@ -202,3 +203,25 @@ class DocumentImageSerializer(DocgiFlexToPresentMixin,
         url = ret.pop("image")
         ret["src"] = url
         return ret
+
+
+class PublicCollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Collection
+        fields = (
+            "id", "name", "workspace", "creator", "emoji",
+            "color", "children", "public",
+        )
+        read_only_fields = ("workspace", "creator", "public_by")
+
+    color = ColorField(read_only=True)
+    children = serializers.SerializerMethodField()
+    workspace = WorkspacePublicInfoSerializer(read_only=True)
+
+    def get_children(self, obj):
+        child_docs = SimpleDocsInfoSerializer(
+            instance=obj.documents.all(),
+            many=True,
+            context=self.context
+        ).data
+        return child_docs

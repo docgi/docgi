@@ -100,7 +100,17 @@ class PublicCollectionAPI(RetrieveModelMixin,
                           viewsets.GenericViewSet):
     queryset = models.Collection.objects.filter(
         public=True
+    ).select_related(
+        "workspace"
+    ).prefetch_related(
+        Prefetch(
+            "documents",
+            queryset=models.Document.objects.select_related(
+                "creator",
+                "last_update_by"
+            )
+        )
     )
-    serializer_class = serializers.CollectionSerializer
+    serializer_class = serializers.PublicCollectionSerializer
     permission_classes = [AllowAny]
     lookup_value_regex = REGEX_UUID
