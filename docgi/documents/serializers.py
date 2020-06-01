@@ -205,6 +205,17 @@ class DocumentImageSerializer(DocgiFlexToPresentMixin,
         return ret
 
 
+class PublicDocSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Document
+        fields = (
+            "id", "name", "created", "modified", "collection", "html_content", "creator", "last_update_by"
+        )
+
+    creator = UserInfoSerializer(read_only=True)
+    last_update_by = UserInfoSerializer(read_only=True)
+
+
 class PublicCollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collection
@@ -215,13 +226,5 @@ class PublicCollectionSerializer(serializers.ModelSerializer):
         read_only_fields = ("workspace", "creator", "public_by")
 
     color = ColorField(read_only=True)
-    children = serializers.SerializerMethodField()
+    children = PublicDocSerializer(many=True, read_only=True, source="documents")
     workspace = WorkspacePublicInfoSerializer(read_only=True)
-
-    def get_children(self, obj):
-        child_docs = SimpleDocsInfoSerializer(
-            instance=obj.documents.all(),
-            many=True,
-            context=self.context
-        ).data
-        return child_docs

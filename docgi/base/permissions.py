@@ -16,11 +16,11 @@ class DocgiPermissionHelper(object):
         return request.method == PUT
 
     @staticmethod
-    def is_patch(request) -> bool:
+    def is_patch(request: Request) -> bool:
         return request.method == PATCH
 
     @staticmethod
-    def is_update(request) -> bool:
+    def is_update(request: Request) -> bool:
         return DocgiPermissionHelper.is_patch(request) | DocgiPermissionHelper.is_put(request)
 
     @staticmethod
