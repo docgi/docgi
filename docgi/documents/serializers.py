@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
 from django.db import transaction
+from rest_framework import serializers
 
 from docgi.base.serializer_fields import ColorField
 from docgi.base.serializers import (
@@ -32,7 +32,7 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
         model = models.Collection
         fields = (
             "id", "name", "workspace", "creator", "emoji",
-            "private", "color", "children", "is_collection",
+            "private", "color", "is_collection",
             "public", "public_by", "public_link"
         )
         read_only_fields = ("workspace", "creator", "public_by")
@@ -50,7 +50,6 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
         update_only_fields = ("public",)
 
     color = ColorField(required=False, default="f5f5f5")
-    children = serializers.SerializerMethodField()
     is_collection = serializers.SerializerMethodField()
     public_link = serializers.SerializerMethodField()
 
@@ -60,21 +59,13 @@ class CollectionSerializer(DocgiSerializerUtilMixin,
             name__iexact=name,
             workspace_id=self.cur_user.get_current_workspace_id(),
         )
-        if self.is_update_action():
+        if self.is_update_method():
             checker = checker.exclude(id=view.kwargs.get("pk"))
 
         if checker.exists():
             raise serializers.ValidationError("That name already taken.")
 
         return name
-
-    def get_children(self, obj):
-        child_docs = SimpleDocsInfoSerializer(
-            instance=obj.documents.all(),
-            many=True,
-            context=self.context
-        ).data
-        return child_docs
 
     def get_public_link(self, collection):
         return services.build_public_collection_url(collection, self.get_request())
@@ -136,7 +127,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
 
     def get_fields(self):
         fields = super().get_fields()
-        if self.is_update_action():
+        if self.is_update_method():
             setattr(fields["name"], "required", False)
         return fields
 
@@ -176,7 +167,7 @@ class DocumentSerializer(DocgiFlexToPresentMixin,
         ret = super().to_representation(instance)
 
         # Ignore both fields on create action, because client already hold it
-        if self.is_create_action():
+        if self.is_post_method():
             ret.pop("html_content")
             ret.pop("json_content")
 

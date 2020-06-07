@@ -30,14 +30,6 @@ class CollectionViewSet(viewsets.ModelViewSet):
             Q(
                 private=True, creator=self.request.user
             )
-        ).prefetch_related(
-            Prefetch(
-                "documents",
-                queryset=models.Document.objects.select_related(
-                    "creator",
-                    "last_update_by"
-                )
-            )
         )
 
 

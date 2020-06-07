@@ -2,3 +2,4 @@
 
 uwsgi
 sentry-sdk==0.14.4
+factory-boy

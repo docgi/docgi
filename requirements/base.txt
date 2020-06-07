@@ -13,5 +13,4 @@ djangorestframework_simplejwt
 uuid
 django_filter
 django-cors-headers
-drf-dumas==0.0.1
 django-extensions==2.2.9

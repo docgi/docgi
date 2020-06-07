@@ -13,17 +13,9 @@ PATCH = "PATCH"
 
 
 class DocgiSerializerUtilMixin(object):
-    def is_update_action(self):
-        view_action = self.context["view"].action
-        return view_action in [UPDATE_ACTION, PARTIAL_UPDATE_ACTION]
-
     def is_update_method(self):
         method = self.context["request"].method
         return method in [PUT, PATCH]
-
-    def is_create_action(self):
-        view_action = self.context["view"].action
-        return view_action == CREATE_ACTION
 
     def is_post_method(self):
         method = self.context["request"].method

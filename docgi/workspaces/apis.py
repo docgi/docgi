@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from docgi.utils import strings, mailer
-from . import models, serializers, permissions, utils
+from . import models, serializers, permissions, utils, services
 
 HOST_NAME = app_settings.HOST_NAME
 
@@ -49,39 +49,11 @@ class StatsWorkspaceAPI(APIView):
     permission_classes = [permissions.IsMemberWorkspace]
 
     def get(self, request, **kwargs):
-        from docgi.users.serializers import UserInfoSerializer
-
         context = dict(
             request=request,
             view=self
         )
-
-        current_user = request.user
-        user = UserInfoSerializer(
-            instance=current_user,
-            context=context
-        ).data
-        workspace = serializers.WorkspaceSerializer(
-            instance=current_user.current_workspace,
-            context=context
-        ).data
-
-        workspace_members = models.WorkspaceMember.objects.filter(
-            workspace=current_user.current_workspace,
-        ).select_related(
-            "user"
-        )
-        members = serializers.WorkspaceMemberSerializer(
-            context=context,
-            many=True,
-            instance=workspace_members
-        ).data
-
-        data = dict(
-            user=user,
-            workspace=workspace,
-            members=members
-        )
+        data = services.get_stat_data(user=request.user, context=context)
 
         return Response(data=data)
 
