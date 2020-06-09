@@ -50,6 +50,7 @@ LOCAL_APPS = [
     'docgi.workspaces.apps.WorkspacesConfig',
     'docgi.documents.apps.DocumentsConfig',
     'docgi.activities.apps.ActivitiesConfig',
+    'docgi.kanban.apps.KanbanConfig',
 ]
 DJANGO_APPS = [
     'django.contrib.admin',

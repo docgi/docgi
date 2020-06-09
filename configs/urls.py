@@ -40,4 +40,5 @@ urlpatterns = [
     path("api/", include('docgi.users.urls', namespace='users')),
     path("api/", include('docgi.workspaces.urls', namespace='workspaces')),
     path("api/", include('docgi.documents.urls', namespace='documents')),
+    path("api/", include('docgi.kanban.urls', namespace='kanban')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
