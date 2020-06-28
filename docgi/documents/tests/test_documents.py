@@ -50,6 +50,9 @@ class TestDocument(DocgiTestCase):
 
         self.put(url_doc_detail(res.data["id"]), payload_update, status_code=status.HTTP_200_OK)
 
+    def test_create_empty_name_doc(self):
+        self._new_doc(name="", collection_id=self.collection.id)
+
     def test_update_with_other_user(self):
         res = self._new_doc(
             collection_id=self.collection.id,
