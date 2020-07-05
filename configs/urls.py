@@ -36,7 +36,7 @@ urlpatterns = [
     path('bleic/', admin.site.urls),
     url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
-    path("api/", include('docgi.auth.urls', namespace="auth")),
+    path("api/", include('docgi.authenticate.urls', namespace="auth")),
     path("api/", include('docgi.users.urls', namespace='users')),
     path("api/", include('docgi.workspaces.urls', namespace='workspaces')),
     path("api/", include('docgi.documents.urls', namespace='documents')),

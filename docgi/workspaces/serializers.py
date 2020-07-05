@@ -6,7 +6,7 @@ from django.db import transaction
 from django.http import Http404
 from rest_framework import serializers
 
-from docgi.auth.serializers import DocgiTokenObtainPairSerializer
+from docgi.authenticate.serializers import DocgiTokenObtainPairSerializer
 from docgi.users.serializers import UserSerializer
 from docgi.utils.mailer import send_mail
 
@@ -70,7 +70,7 @@ class CreateWorkspaceSerializer(serializers.Serializer):
         )
 
     def to_representation(self, data):
-        from docgi.auth.serializers import KEY_WORKSPACE_ROLE_OBTAIN_TOKEN, KEY_WORKSPACE_NAME_OBTAIN_TOKEN
+        from docgi.authenticate.serializers import KEY_WORKSPACE_ROLE_OBTAIN_TOKEN, KEY_WORKSPACE_NAME_OBTAIN_TOKEN
 
         user = data.get("user")
         workspace = data.get("workspace")
@@ -234,7 +234,7 @@ class JoinInvitationSerializer(serializers.Serializer):
         )
 
     def to_representation(self, data):
-        from docgi.auth.serializers import KEY_WORKSPACE_ROLE_OBTAIN_TOKEN, KEY_WORKSPACE_NAME_OBTAIN_TOKEN
+        from docgi.authenticate.serializers import KEY_WORKSPACE_ROLE_OBTAIN_TOKEN, KEY_WORKSPACE_NAME_OBTAIN_TOKEN
 
         user = data.get("user")
         workspace = data.get("workspace")

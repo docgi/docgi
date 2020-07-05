@@ -1,6 +1,8 @@
 from urllib.parse import urljoin
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.serializers import SlugField, Serializer, EmailField, ValidationError, CharField
@@ -9,12 +11,14 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshT
 
 from docgi.utils.mailer import send_mail
 from docgi.workspaces.models import WorkspaceMember
+from . import models
 
 User = get_user_model()
 
 KEY_WORKSPACE_NAME_OBTAIN_TOKEN = "workspace_name"
 KEY_WORKSPACE_ROLE_OBTAIN_TOKEN = "workspace_role"
 FRONTEND_URL_RESET_PASS = "auth/reset-password"
+EXPIRE_RESET_PASSWORD_TOKEN = timedelta(days=1)
 
 
 class DocgiTokenObtainPairSerializer(TokenObtainSerializer):
@@ -81,6 +85,12 @@ class ForgotPasswordSerializer(Serializer):
             is_reset=True,
             **{KEY_WORKSPACE_NAME_OBTAIN_TOKEN: workspace}
         )
+
+        models.ResetPasswordToken.objects.create(
+            user=user,
+            token=reset_token
+        )
+
         reset_link = urljoin(client_origin, f"{FRONTEND_URL_RESET_PASS}?token={reset_token}")
 
         context = dict(
@@ -114,19 +124,32 @@ class ResetPasswordSerializer(Serializer):
 
     def validate(self, attrs):
         try:
-            refresh_token = RefreshToken(attrs['token'])
+            token = attrs.get("token")
+            refresh_token = RefreshToken(token)
             if not refresh_token.get("is_reset", False):
                 raise ValidationError({
-                    "token": ["Invalid token"]
+                    "msg": ["Invalid token"]
                 })
             attrs.update(refresh_token=refresh_token)
+
+            token_obj = models.ResetPasswordToken.objects.filter(
+                user_id=refresh_token["user_id"],
+                token=token
+            ).first()
+            if token_obj is None or token_obj.is_active is False:
+                raise ValidationError({"msg": "Invalid token"})
+
+            _now = now()
+            if (now() - token_obj.created) > EXPIRE_RESET_PASSWORD_TOKEN:
+                raise ValidationError({"msg": "Expired token"})
+
         except TokenError:
             raise ValidationError({
-                "token": ["Expired token"]
+                "msg": ["Expired token"]
             })
 
         if attrs["password"] != attrs["confirm_password"]:
-            raise ValidationError({"confirm_password": "Password and password confirm does not match."})
+            raise ValidationError({"confirm_password": "Password and password confirm do not match."})
         return attrs
 
     def create(self, validated_data):

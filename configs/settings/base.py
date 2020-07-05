@@ -46,6 +46,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
 ]
 LOCAL_APPS = [
+    'docgi.authenticate.apps.AuthenticationConfig',
     'docgi.users.apps.UsersConfig',
     'docgi.workspaces.apps.WorkspacesConfig',
     'docgi.documents.apps.DocumentsConfig',
@@ -149,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'docgi.auth.jwt.DocgiJWTAuthentication',
+        'docgi.authenticate.jwt.DocgiJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',

@@ -39,14 +39,14 @@ class User(AbstractUser):
                                  blank=True)
 
     def get_current_workspace_id(self):
-        from docgi.auth.jwt import KEY_USER_WORKSPACE_NAME
+        from docgi.authenticate.jwt import KEY_USER_WORKSPACE_NAME
         workspace_name = getattr(self, KEY_USER_WORKSPACE_NAME, None)
         if not workspace_name:
             raise InvalidToken()
         return workspace_name
 
     def get_current_workspace_role(self):
-        from docgi.auth.jwt import KEY_USER_WORKSPACE_ROLE
+        from docgi.authenticate.jwt import KEY_USER_WORKSPACE_ROLE
         role = getattr(self, KEY_USER_WORKSPACE_ROLE, None)
         if not role:
             raise InvalidToken()
