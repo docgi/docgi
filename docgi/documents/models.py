@@ -3,7 +3,7 @@ from os import path
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from django.contrib.postgres.fields.jsonb import JSONField
+from django.db.models import JSONField
 from django.core.files.storage import get_storage_class
 from django.db import models
 from model_utils.models import TimeStampedModel

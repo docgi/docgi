@@ -121,6 +121,7 @@ class SendInvitationSerializer(serializers.Serializer):
 
     def _send_invite(self, instances, workspace_name):
         for instance in instances:
+            # TODO(nakhoa): refactor link_join, don't need URL_FRONT_END_JOIN_INVITE to build link
             link_join = path.join(*[app_settings.FRONT_END_HOST_NAME,
                                     URL_FRONT_END_JOIN_INVITE.format(workspace_name, instance.uuid)])
             ctx = dict(

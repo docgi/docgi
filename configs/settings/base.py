@@ -93,17 +93,17 @@ CACHES = {
 
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
-EMAIL_HOST = env.str('EMAIL_HOST')
-EMAIL_PORT = env.int('EMAIL_PORT')
-EMAIL_HOST_USER = env.str('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', False)
+EMAIL_HOST = env.str('EMAIL_HOST', 'example.com')
+EMAIL_PORT = env.int('EMAIL_PORT', 9090)
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', 'amdin')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', 'admin')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            BASE_DIR.path('docgi/templates'),
+            str(BASE_DIR.path('docgi/templates')),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -124,7 +124,14 @@ WSGI_APPLICATION = 'configs.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db()
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env.str('DB_NAME', 'docgi'),
+        'USER': env.str('DB_USER', 'docgi'),
+        'PASSWORD': env.str('DB_PASS', 'lTSNXWCbqQ'),
+        'HOST': env.str('DB_HOST', 'localhost'),
+        'PORT': env.str('DB_PORT', '1234'),
+    }
 }
 
 
@@ -217,6 +224,8 @@ SWAGGER_SETTINGS = {
 ##############################
 # Config for local docgi
 ##############################
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # Invitation
 INVITATION_EXPIRE_DURING = 60 * 60 * 24 * 3  # Three days

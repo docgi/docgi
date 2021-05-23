@@ -2,7 +2,6 @@ start-docker:
 	docker-compose -f docker-compose-local.yml up -d
 
 runserver:
-	docker-compose -f docker-compose-local.yml up -d
 	./manage.py runserver 8008 --settings=configs.settings.local
 
 keepdb_test:

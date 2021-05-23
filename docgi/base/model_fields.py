@@ -6,6 +6,4 @@ class ScopeIDField(PositiveIntegerField):
         super().__init__(**kwargs)
 
     def get_db_prep_value(self, value, connection, prepared=False):
-        c = super().get_db_prep_value(value, connection, prepared)
-        import ipdb
-        ipdb.set_trace()
+        super().get_db_prep_value(value, connection, prepared)
